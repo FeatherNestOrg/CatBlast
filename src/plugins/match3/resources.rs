@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use std::alloc::Layout;
 
 #[derive(Resource)]
 pub struct Board {
@@ -15,4 +16,10 @@ impl Board {
             grid: vec![vec![None; height as usize]; width as usize],
         }
     }
+}
+
+#[derive(Resource)]
+pub struct GemAtlas {
+    pub layout: Handle<TextureAtlasLayout>,
+    pub image: Handle<Image>,
 }
