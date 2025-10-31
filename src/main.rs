@@ -1,4 +1,5 @@
 mod state;
+mod plugins;
 
 use bevy::prelude::*;
 use crate::state::GameState;
