@@ -60,7 +60,8 @@ fn setup_match3_scene(mut commands: Commands, gem_atlas: Res<GemAtlas>, config: 
 
     for x in 0..board.width {
         for y in 0..board.height {
-            let gem_type = GemType::Ice; // 暂时用一个固定的类型举例
+            let gem_type = GemType::random();
+
 
             // 计算正确的图块索引 (第二行索引 = 类型索引 + 8)
             let atlas_index = gem_type as usize + 8;

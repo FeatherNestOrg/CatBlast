@@ -1,4 +1,6 @@
+use bevy::platform::collections::Equivalent;
 use bevy::prelude::*;
+use rand::Rng;
 
 #[derive(Component)]
 pub struct Gem;
@@ -20,6 +22,24 @@ pub enum GemType {
     Fire,
     Grass,
     Normal,
+}
+
+impl GemType {
+    pub fn random() -> Self {
+        const VARIANTS: [GemType; 8] = [
+            GemType::Ice,
+            GemType::Water,
+            GemType::Fairy,
+            GemType::Poison,
+            GemType::Fight,
+            GemType::Fire,
+            GemType::Grass,
+            GemType::Normal,
+        ];
+        let mut rng = rand::rng();
+        let idx = rng.random_range(0..VARIANTS.len());
+        VARIANTS[idx]
+    }
 }
 
 #[derive(Component)]
