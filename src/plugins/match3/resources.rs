@@ -23,3 +23,8 @@ pub struct GemAtlas {
     pub layout: Handle<TextureAtlasLayout>,
     pub image: Handle<Image>,
 }
+
+#[derive(Resource, Default)]
+pub struct SelectionState {
+    pub selected_gem: Option<Entity>,
+}
