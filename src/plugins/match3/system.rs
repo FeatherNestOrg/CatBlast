@@ -1,7 +1,6 @@
-use std::process::Command;
 use crate::plugins::match3::components::{Gem, GridPosition, Selected};
 use crate::plugins::match3::message::{GemClickedEvent, RequestSwapEvent};
-use crate::plugins::match3::resources::{Board, SelectionState};
+use crate::plugins::match3::resources::{Board, Match3Config, SelectionState};
 use bevy::camera::{Camera, Camera2d};
 use bevy::input::ButtonInput;
 use bevy::prelude::{Commands, Entity, GlobalTransform, MessageReader, MessageWriter, MouseButton, Query, Res, ResMut, With};
@@ -14,7 +13,7 @@ pub fn gem_input_system(
     board: Res<Board>,
     gem_query: Query<(Entity, &GridPosition), With<Gem>>,
     mut clicked_mw: MessageWriter<GemClickedEvent>,
-    mut commands: Commands,
+    config: Res<Match3Config>,
 ) {
     if !mouse_button_input.just_pressed(MouseButton::Left) {
         return;
@@ -27,8 +26,7 @@ pub fn gem_input_system(
     };
 
     if let Some(Ok(world_position)) = window.cursor_position().map(|cursor| camera.viewport_to_world_2d(camera_transform, cursor)) {
-        let gem_size = 40.0;
-        let gem_size = 40.0;
+        let gem_size = config.gem_size;
         let board_size_x = board.width as f32 * gem_size;
         let board_size_y = board.height as f32 * gem_size;
 

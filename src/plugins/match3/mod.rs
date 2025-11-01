@@ -1,6 +1,6 @@
 use crate::plugins::match3::system::{gem_input_system, gem_selection_system};
 use crate::plugins::match3::components::{Gem, GemType, GridPosition};
-use crate::plugins::match3::resources::{GemAtlas, SelectionState};
+use crate::plugins::match3::resources::{GemAtlas, Match3Config, SelectionState};
 use crate::state::GameState;
 use bevy::prelude::*;
 use resources::Board;
@@ -18,6 +18,7 @@ impl Plugin for Match3Plugin {
         app
             .add_message::<GemClickedEvent>()
             .add_message::<RequestSwapEvent>()
+            .init_resource::<Match3Config>()
             .init_resource::<SelectionState>()
             .add_systems(
                 OnEnter(GameState::Match3),
@@ -51,13 +52,12 @@ fn setup_gem_atlas(
     })
 }
 
-fn setup_match3_scene(mut commands: Commands, gem_atlas: Res<GemAtlas>) {
+fn setup_match3_scene(mut commands: Commands, gem_atlas: Res<GemAtlas>, config: Res<Match3Config>) {
     println!("Entering Match3 Scene! Let's set up the board.");
     commands.spawn(Camera2d);
 
-    let board = Board::new(8, 8);
+    let board = Board::new(config.board_width, config.board_height);
 
-    let gem_size = 40.0;
     for x in 0..board.width {
         for y in 0..board.height {
             let gem_type = GemType::Ice; // 暂时用一个固定的类型举例
@@ -74,8 +74,8 @@ fn setup_match3_scene(mut commands: Commands, gem_atlas: Res<GemAtlas>) {
                     },
                 ),
                 Transform::from_xyz(
-                    x as f32 * gem_size - (board.width as f32 * gem_size) / 2.0 + gem_size / 2.0,
-                    y as f32 * gem_size - (board.height as f32 * gem_size) / 2.0 + gem_size / 2.0,
+                    x as f32 * config.gem_size - (board.width as f32 * config.gem_size) / 2.0 + config.gem_size / 2.0,
+                    y as f32 * config.gem_size - (board.height as f32 * config.gem_size) / 2.0 + config.gem_size / 2.0,
                     0.0,
                 ),
                 Gem,
