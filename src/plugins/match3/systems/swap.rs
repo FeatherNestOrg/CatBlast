@@ -1,4 +1,4 @@
-use crate::plugins::match3::components::{GemAnimating, GridPosition};
+use crate::plugins::match3::components::{SwapAnimating, GridPosition};
 use crate::plugins::match3::message::RequestSwapEvent;
 use crate::plugins::match3::resources::Board;
 use crate::plugins::match3::state::Match3State;
@@ -18,8 +18,8 @@ pub fn swap_system(
         if let Ok([(mut pos1, trans1), (mut pos2, trans2)]) =
             q_gems.get_many_mut([event.entity1, event.entity2])
         {
-            let anim1 = GemAnimating::new(trans1.translation, trans2.translation, 0.2);
-            let anim2 = GemAnimating::new(trans2.translation, trans1.translation, 0.2);
+            let anim1 = SwapAnimating::new(trans1.translation, trans2.translation, 0.2);
+            let anim2 = SwapAnimating::new(trans2.translation, trans1.translation, 0.2);
 
             println!("Swapping gems at {:?} and {:?}", *pos1, *pos2);
 
@@ -32,7 +32,7 @@ pub fn swap_system(
             commands.entity(event.entity2).insert(anim2);
 
             println!("Starting swap animation, switching to Animating state.");
-            next_state.set(Match3State::Animating);
+            next_state.set(Match3State::SwapAnimating);
         };
     }
     swap_mr.clear();

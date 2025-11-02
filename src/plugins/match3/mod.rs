@@ -2,9 +2,7 @@ use crate::plugins::match3::components::{Gem, GemType, GridPosition};
 use crate::plugins::match3::message::{GemClickedEvent, RequestSwapEvent, SwapCompletedEvent};
 use crate::plugins::match3::resources::{GemAtlas, Match3Config, SelectionState};
 use crate::plugins::match3::state::Match3State;
-use crate::plugins::match3::systems::animation::{
-    check_animation_completion_system, gem_animation_system,
-};
+use crate::plugins::match3::systems::animation::{check_swap_animation_completion_system, swap_animation_system, blast_animation_system, check_blast_animation_completion_system};
 use crate::plugins::match3::systems::detection::match_detection_system;
 use crate::plugins::match3::systems::input::{gem_input_system, gem_selection_system};
 use crate::plugins::match3::systems::swap::swap_system;
@@ -50,9 +48,21 @@ impl Plugin for Match3Plugin {
             )
             .add_systems(
                 Update,
-                (gem_animation_system, check_animation_completion_system)
+                (
+                    swap_animation_system,
+                    check_swap_animation_completion_system
+                )
                     .chain()
-                    .run_if(in_state(Match3State::Animating)),
+                    .run_if(in_state(Match3State::SwapAnimating)),
+            )
+            .add_systems(
+                Update,
+                (
+                    blast_animation_system,
+                    check_blast_animation_completion_system
+                )
+                    .chain()
+                    .run_if(in_state(Match3State::BlastAnimating)),
             )
             .add_systems(
                 Update,

@@ -1,4 +1,3 @@
-use bevy::platform::collections::Equivalent;
 use bevy::prelude::*;
 use bevy::time::TimerMode::Once;
 use rand::Rng;
@@ -44,13 +43,13 @@ impl GemType {
 }
 
 #[derive(Component)]
-pub struct GemAnimating {
+pub struct SwapAnimating {
     pub start_pos: Vec3,
     pub end_pos: Vec3,
     pub timer: Timer,
 }
 
-impl GemAnimating {
+impl SwapAnimating {
     pub fn new(start_pos: Vec3, end_pos: Vec3, duration_secs: f32) -> Self {
         Self {
             start_pos,
@@ -59,6 +58,20 @@ impl GemAnimating {
         }
     }
 }
+
+#[derive(Component)]
+pub struct BlastAnimating {
+    pub timer: Timer,
+}
+
+impl BlastAnimating {
+    pub fn new(duration_secs: f32) -> Self {
+        Self {
+            timer: Timer::from_seconds(duration_secs, Once),
+        }
+    }
+}
+
 #[derive(Component)]
 pub struct Selected {
     pub timer: Timer,
