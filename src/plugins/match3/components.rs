@@ -1,5 +1,6 @@
 use bevy::platform::collections::Equivalent;
 use bevy::prelude::*;
+use bevy::time::TimerMode::Once;
 use rand::Rng;
 
 #[derive(Component)]
@@ -54,9 +55,19 @@ impl GemAnimating {
         Self {
             start_pos,
             end_pos,
-            timer: Timer::from_seconds(duration_secs, TimerMode::Once),
+            timer: Timer::from_seconds(duration_secs, Once),
         }
     }
 }
 #[derive(Component)]
-pub struct Selected;
+pub struct Selected {
+    pub timer: Timer,
+}
+
+impl Selected {
+    pub fn default() -> Self {
+        Self {
+            timer: Timer::from_seconds(0.1, Once),
+        }
+    }
+}

@@ -7,7 +7,9 @@ use crate::plugins::match3::systems::animation::{
 };
 use crate::plugins::match3::systems::detection::{match_detection_system, swap_system};
 use crate::plugins::match3::systems::input::{gem_input_system, gem_selection_system};
-use crate::plugins::match3::systems::visual::{apply_selection_effect, remove_selection_effect};
+use crate::plugins::match3::systems::visual::{
+    animate_selection_effect, apply_selection_effect, remove_selection_effect,
+};
 use crate::state::GameState;
 use bevy::prelude::*;
 use bevy::render::view::Hdr;
@@ -39,6 +41,7 @@ impl Plugin for Match3Plugin {
                     gem_input_system,
                     gem_selection_system,
                     swap_system.after(gem_selection_system),
+                    animate_selection_effect,
                     apply_selection_effect,
                     remove_selection_effect,
                 )

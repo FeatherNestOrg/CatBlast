@@ -68,7 +68,7 @@ pub fn gem_selection_system(
             None => {
                 println!("Selected first gem");
                 selection_state.selected_gem = Some(clicked_entity);
-                commands.entity(clicked_entity).insert(Selected);
+                commands.entity(clicked_entity).insert(Selected::default());
             }
             Some(first_entity) => {
                 if first_entity == clicked_entity {
