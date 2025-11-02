@@ -5,8 +5,9 @@ use crate::plugins::match3::state::Match3State;
 use crate::plugins::match3::systems::animation::{
     check_animation_completion_system, gem_animation_system,
 };
-use crate::plugins::match3::systems::detection::{match_detection_system, swap_system};
+use crate::plugins::match3::systems::detection::match_detection_system;
 use crate::plugins::match3::systems::input::{gem_input_system, gem_selection_system};
+use crate::plugins::match3::systems::swap::swap_system;
 use crate::plugins::match3::systems::visual::{
     animate_selection_effect, apply_selection_effect, remove_selection_effect,
 };
