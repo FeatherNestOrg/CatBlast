@@ -43,4 +43,20 @@ impl GemType {
 }
 
 #[derive(Component)]
+pub struct GemAnimating {
+    pub start_pos: Vec3,
+    pub end_pos: Vec3,
+    pub timer: Timer,
+}
+
+impl GemAnimating {
+    pub fn new(start_pos: Vec3, end_pos: Vec3, duration_secs: f32) -> Self {
+        Self {
+            start_pos,
+            end_pos,
+            timer: Timer::from_seconds(duration_secs, TimerMode::Once),
+        }
+    }
+}
+#[derive(Component)]
 pub struct Selected;

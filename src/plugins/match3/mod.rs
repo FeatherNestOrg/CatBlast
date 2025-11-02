@@ -1,6 +1,10 @@
 use crate::plugins::match3::components::{Gem, GemType, GridPosition};
 use crate::plugins::match3::message::{GemClickedEvent, RequestSwapEvent, SwapCompletedEvent};
 use crate::plugins::match3::resources::{GemAtlas, Match3Config, SelectionState};
+use crate::plugins::match3::state::Match3State;
+use crate::plugins::match3::systems::animation::{
+    check_animation_completion_system, gem_animation_system,
+};
 use crate::plugins::match3::systems::detection::{match_detection_system, swap_system};
 use crate::plugins::match3::systems::input::{gem_input_system, gem_selection_system};
 use crate::plugins::match3::systems::visual::{apply_selection_effect, remove_selection_effect};
@@ -12,6 +16,7 @@ use resources::Board;
 mod components;
 mod message;
 mod resources;
+mod state;
 mod systems;
 
 pub struct Match3Plugin;
@@ -23,6 +28,7 @@ impl Plugin for Match3Plugin {
             .add_message::<SwapCompletedEvent>()
             .init_resource::<Match3Config>()
             .init_resource::<SelectionState>()
+            .add_sub_state::<Match3State>()
             .add_systems(
                 OnEnter(GameState::Match3),
                 (setup_gem_atlas, setup_match3_scene).chain(),
@@ -32,12 +38,21 @@ impl Plugin for Match3Plugin {
                 (
                     gem_input_system,
                     gem_selection_system,
-                    match_detection_system,
                     swap_system.after(gem_selection_system),
                     apply_selection_effect,
                     remove_selection_effect,
                 )
                     .run_if(in_state(GameState::Match3)),
+            )
+            .add_systems(
+                Update,
+                (gem_animation_system, check_animation_completion_system)
+                    .chain()
+                    .run_if(in_state(Match3State::Animating)),
+            )
+            .add_systems(
+                Update,
+                (match_detection_system).run_if(in_state(Match3State::ProcessingMatches)),
             )
             .add_systems(OnExit(GameState::Match3), cleanup_match3_scene);
     }
