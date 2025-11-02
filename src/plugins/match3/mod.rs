@@ -1,23 +1,26 @@
-use crate::plugins::match3::system::{gem_input_system, gem_selection_system};
 use crate::plugins::match3::components::{Gem, GemType, GridPosition};
+use crate::plugins::match3::message::{GemClickedEvent, RequestSwapEvent, SwapCompletedEvent};
 use crate::plugins::match3::resources::{GemAtlas, Match3Config, SelectionState};
+use crate::plugins::match3::systems::detection::{match_detection_system, swap_system};
+use crate::plugins::match3::systems::input::{gem_input_system, gem_selection_system};
+use crate::plugins::match3::systems::visual::{apply_selection_effect, remove_selection_effect};
 use crate::state::GameState;
 use bevy::prelude::*;
+use bevy::render::view::Hdr;
 use resources::Board;
-use crate::plugins::match3::message::{GemClickedEvent, RequestSwapEvent};
 
 mod components;
-mod resources;
 mod message;
-mod system;
+mod resources;
+mod systems;
 
 pub struct Match3Plugin;
 
 impl Plugin for Match3Plugin {
     fn build(&self, app: &mut App) {
-        app
-            .add_message::<GemClickedEvent>()
+        app.add_message::<GemClickedEvent>()
             .add_message::<RequestSwapEvent>()
+            .add_message::<SwapCompletedEvent>()
             .init_resource::<Match3Config>()
             .init_resource::<SelectionState>()
             .add_systems(
@@ -26,9 +29,14 @@ impl Plugin for Match3Plugin {
             )
             .add_systems(
                 Update,
-                (gem_input_system,
-                 gem_selection_system,
-                 match_detection_system)
+                (
+                    gem_input_system,
+                    gem_selection_system,
+                    match_detection_system,
+                    swap_system.after(gem_selection_system),
+                    apply_selection_effect,
+                    remove_selection_effect,
+                )
                     .run_if(in_state(GameState::Match3)),
             )
             .add_systems(OnExit(GameState::Match3), cleanup_match3_scene);
@@ -54,14 +62,13 @@ fn setup_gem_atlas(
 
 fn setup_match3_scene(mut commands: Commands, gem_atlas: Res<GemAtlas>, config: Res<Match3Config>) {
     println!("Entering Match3 Scene! Let's set up the board.");
-    commands.spawn(Camera2d);
+    commands.spawn((Camera2d, Hdr));
 
     let board = Board::new(config.board_width, config.board_height);
 
     for x in 0..board.width {
         for y in 0..board.height {
             let gem_type = GemType::random();
-
 
             // 计算正确的图块索引 (第二行索引 = 类型索引 + 8)
             let atlas_index = gem_type as usize + 8;
@@ -75,8 +82,10 @@ fn setup_match3_scene(mut commands: Commands, gem_atlas: Res<GemAtlas>, config: 
                     },
                 ),
                 Transform::from_xyz(
-                    x as f32 * config.gem_size - (board.width as f32 * config.gem_size) / 2.0 + config.gem_size / 2.0,
-                    y as f32 * config.gem_size - (board.height as f32 * config.gem_size) / 2.0 + config.gem_size / 2.0,
+                    x as f32 * config.gem_size - (board.width as f32 * config.gem_size) / 2.0
+                        + config.gem_size / 2.0,
+                    y as f32 * config.gem_size - (board.height as f32 * config.gem_size) / 2.0
+                        + config.gem_size / 2.0,
                     0.0,
                 ),
                 Gem,
@@ -86,10 +95,6 @@ fn setup_match3_scene(mut commands: Commands, gem_atlas: Res<GemAtlas>, config: 
         }
     }
     commands.insert_resource(board);
-}
-
-fn match_detection_system() {
-    /* ... */
 }
 
 fn cleanup_match3_scene(mut commands: Commands, query: Query<Entity, With<Gem>>) {

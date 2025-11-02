@@ -1,11 +1,8 @@
 use crate::plugins::match3::components::{Gem, GridPosition, Selected};
 use crate::plugins::match3::message::{GemClickedEvent, RequestSwapEvent};
 use crate::plugins::match3::resources::{Board, Match3Config, SelectionState};
-use bevy::camera::{Camera, Camera2d};
-use bevy::input::ButtonInput;
-use bevy::prelude::{Commands, Entity, GlobalTransform, MessageReader, MessageWriter, MouseButton, Query, Res, ResMut, With};
-use bevy::window::{PrimaryWindow, Window};
-
+use bevy::prelude::*;
+use bevy::window::PrimaryWindow;
 pub fn gem_input_system(
     mouse_button_input: Res<ButtonInput<MouseButton>>,
     q_window: Query<&Window, With<PrimaryWindow>>,
@@ -25,7 +22,10 @@ pub fn gem_input_system(
         return;
     };
 
-    if let Some(Ok(world_position)) = window.cursor_position().map(|cursor| camera.viewport_to_world_2d(camera_transform, cursor)) {
+    if let Some(Ok(world_position)) = window
+        .cursor_position()
+        .map(|cursor| camera.viewport_to_world_2d(camera_transform, cursor))
+    {
         let gem_size = config.gem_size;
         let board_size_x = board.width as f32 * gem_size;
         let board_size_y = board.height as f32 * gem_size;
@@ -33,8 +33,11 @@ pub fn gem_input_system(
         let board_origin_x = -board_size_x / 2.0;
         let board_origin_y = -board_size_y / 2.0;
 
-        if world_position.x < board_origin_x || world_position.x > board_origin_x + board_size_x ||
-            world_position.y < board_origin_y || world_position.y > board_origin_y + board_size_y {
+        if world_position.x < board_origin_x
+            || world_position.x > board_origin_x + board_size_x
+            || world_position.y < board_origin_y
+            || world_position.y > board_origin_y + board_size_y
+        {
             return;
         }
 
