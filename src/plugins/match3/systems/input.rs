@@ -47,7 +47,7 @@ pub fn gem_input_system(
         for (gem_entity, grid_pos) in gem_query.iter() {
             if grid_pos.x == grid_x && grid_pos.y == grid_y {
                 // 找到了！发送点击事件
-                println!("Clicked on gem at ({}, {})", grid_x, grid_y);
+                tracing::debug!("Clicked on gem at ({}, {})", grid_x, grid_y);
                 clicked_mw.write(GemClickedEvent { gem_entity });
                 return; // 找到后即可退出
             }
@@ -66,17 +66,17 @@ pub fn gem_selection_system(
         let clicked_entity = event.gem_entity;
         match selection_state.selected_gem {
             None => {
-                println!("Selected first gem");
+                tracing::debug!("Selected first gem");
                 selection_state.selected_gem = Some(clicked_entity);
                 commands.entity(clicked_entity).insert(Selected::default());
             }
             Some(first_entity) => {
                 if first_entity == clicked_entity {
-                    println!("Deselected gem.");
+                    tracing::debug!("Deselected gem.");
                     selection_state.selected_gem = None;
                     commands.entity(first_entity).remove::<Selected>();
                 } else {
-                    println!("Selected second gem. Requesting swap.");
+                    tracing::debug!("Selected second gem. Requesting swap.");
 
                     swap_mw.write(RequestSwapEvent {
                         entity1: first_entity,

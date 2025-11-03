@@ -1,10 +1,12 @@
 use crate::plugins::match3::components::{Gem, GemType, GridPosition};
 use crate::plugins::match3::message::{GemClickedEvent, RequestSwapEvent, SwapCompletedEvent};
-use crate::plugins::match3::resources::{GemAtlas, PendingSwap, Match3Config, SelectionState};
+use crate::plugins::match3::resources::{GemAtlas, Match3Config, PendingSwap, SelectionState};
 use crate::plugins::match3::state::Match3State;
-use crate::plugins::match3::systems::animation::{swap_animation_system, blast_animation_system, blast_particle_system, check_animation_system};
-use crate::plugins::match3::systems::processing::process_board_state_system;
+use crate::plugins::match3::systems::animation::{
+    blast_animation_system, blast_particle_system, check_animation_system, swap_animation_system,
+};
 use crate::plugins::match3::systems::input::{gem_input_system, gem_selection_system};
+use crate::plugins::match3::systems::processing::process_board_state_system;
 use crate::plugins::match3::systems::swap::swap_system;
 use crate::plugins::match3::systems::visual::{
     animate_selection_effect, apply_selection_effect, remove_selection_effect,
@@ -83,7 +85,7 @@ fn setup_gem_atlas(
 }
 
 fn setup_match3_scene(mut commands: Commands, gem_atlas: Res<GemAtlas>, config: Res<Match3Config>) {
-    println!("Entering Match3 Scene! Let's set up the board.");
+    tracing::info!("Entering Match3 Scene! Let's set up the board.");
     commands.spawn((Camera2d, Hdr));
 
     let board = Board::new(config.board_width, config.board_height);
@@ -120,7 +122,7 @@ fn setup_match3_scene(mut commands: Commands, gem_atlas: Res<GemAtlas>, config: 
 }
 
 fn cleanup_match3_scene(mut commands: Commands, query: Query<Entity, With<Gem>>) {
-    println!("Cleaning up Match3 Scene.");
+    tracing::info!("Cleaning up Match3 Scene.");
     for entity in query.iter() {
         commands.entity(entity).despawn();
     }

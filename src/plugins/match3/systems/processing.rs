@@ -1,9 +1,9 @@
-use std::collections::HashSet;
-use crate::plugins::match3::state::Match3State;
-use bevy::prelude::*;
 use crate::plugins::match3::components::{BlastAnimating, Gem, GemType, GridPosition};
 use crate::plugins::match3::resources::{Board, PendingSwap};
+use crate::plugins::match3::state::Match3State;
 use crate::plugins::match3::systems::swap::{add_swap_animation, logical_swap};
+use bevy::prelude::*;
+use std::collections::HashSet;
 
 pub fn process_board_state_system(
     mut commands: Commands,
@@ -25,17 +25,23 @@ pub fn process_board_state_system(
         }
         next_state.set(Match3State::Animating)
     } else if let Some((e1, e2)) = pending_swap.entities.take() {
-        println!("No matches found, and there was a pending swap. Reverting.");
+        tracing::info!("No matches found, and there was a pending swap. Reverting.");
         logical_swap(&mut board, &mut param_set.p1(), e1, e2);
         add_swap_animation(&mut commands, &mut param_set.p2(), e1, e2);
         next_state.set(Match3State::Animating);
-    } else { next_state.set(Match3State::AwaitingInput) }
+    } else {
+        next_state.set(Match3State::AwaitingInput)
+    }
 }
 
-pub fn find_all_matches_on_board(board: &Board, q_gems: &Query<(Entity, &GemType, &mut GridPosition), With<Gem>>) -> HashSet<Entity> {
+pub fn find_all_matches_on_board(
+    board: &Board,
+    q_gems: &Query<(Entity, &GemType, &mut GridPosition), With<Gem>>,
+) -> HashSet<Entity> {
     let mut matches_to_remove: HashSet<Entity> = HashSet::new();
 
-    let mut gem_map: Vec<Vec<Option<(Entity, GemType)>>> = vec![vec![None; board.height as usize]; board.width as usize];
+    let mut gem_map: Vec<Vec<Option<(Entity, GemType)>>> =
+        vec![vec![None; board.height as usize]; board.width as usize];
 
     for (entity, gem_type, pos) in q_gems.iter() {
         gem_map[pos.x as usize][pos.y as usize] = Some((entity, *gem_type));

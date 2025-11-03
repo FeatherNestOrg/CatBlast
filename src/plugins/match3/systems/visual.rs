@@ -28,7 +28,7 @@ pub fn animate_selection_effect(
 
 pub fn apply_selection_effect(query: Query<(&mut Transform, &mut Sprite), Added<Selected>>) {
     for (mut transform, mut sprite) in query {
-        println!("Applying selection effect");
+        tracing::debug!("Applying selection effect");
         transform.translation.z = 10.0;
         sprite.color = Color::WHITE;
     }
@@ -40,7 +40,7 @@ pub fn remove_selection_effect(
 ) {
     for entity in removed.read() {
         if let Ok((mut transform, mut sprite)) = query.get_mut(entity) {
-            println!("Removing selection effect.");
+            tracing::debug!("Removing selection effect.");
             transform.scale = Vec3::splat(NORMAL_SCALE);
             transform.translation.z = NORMAL_Z;
             sprite.color = Color::WHITE;
