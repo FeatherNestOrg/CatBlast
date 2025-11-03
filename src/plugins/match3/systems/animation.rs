@@ -2,11 +2,15 @@ use crate::plugins::match3::components::{spawn_blast_particles, BlastAnimating, 
 use crate::plugins::match3::state::Match3State;
 use bevy::prelude::*;
 use bevy::time::Time;
+use crate::plugins::match3::resources::PendingSwap;
+use crate::plugins::match3::state::Match3State::ProcessingBoard;
 
 pub fn swap_animation_system(
     time: Res<Time>,
     mut q_animation_gems: Query<(Entity, &mut Transform, &mut SwapAnimating)>,
     mut commands: Commands,
+    mut next_state: ResMut<NextState<Match3State>>,
+    pending_swap: Res<PendingSwap>,
 ) {
     for (entity, mut transform, mut animation) in q_animation_gems.iter_mut() {
         animation.timer.tick(time.delta());
@@ -56,23 +60,14 @@ pub fn blast_particle_system(
     }
 }
 
-pub fn check_swap_animation_completion_system(
-    q_animating_swap: Query<&SwapAnimating>,
-    mut next_state: ResMut<NextState<Match3State>>,
-) {
-    if q_animating_swap.is_empty() {
-        println!("All animations finished. Switching to ProcessingMatches state.");
-        next_state.set(Match3State::ProcessingMatches);
-    }
-}
 
-pub fn check_blast_animation_completion_system(
-    q_animating_blast: Query<&BlastAnimating>,
-    q_blast_particles: Query<&BlastParticle>,
+pub fn check_animation_system(
+    q_swap: Query<&SwapAnimating>,
+    q_blast: Query<&BlastAnimating>,
+    q_particle: Query<&BlastParticle>,
     mut next_state: ResMut<NextState<Match3State>>,
 ) {
-    if q_animating_blast.is_empty() && q_blast_particles.is_empty() {
-        println!("All animations finished. Switching to ProcessingMatches state.");
-        next_state.set(Match3State::ProcessingMatches);
+    if q_swap.is_empty() && q_blast.is_empty() && q_particle.is_empty() {
+        next_state.set(ProcessingBoard);
     }
 }

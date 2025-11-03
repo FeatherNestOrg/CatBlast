@@ -6,7 +6,6 @@ use bevy::prelude::*;
 pub enum Match3State {
     #[default]
     AwaitingInput,
-    SwapAnimating,
-    ProcessingMatches,
-    BlastAnimating,
+    Animating,
+    ProcessingBoard,
 }

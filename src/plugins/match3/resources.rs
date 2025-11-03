@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use std::alloc::Layout;
+use std::collections::HashSet;
 
 #[derive(Resource)]
 pub struct Match3Config {
@@ -44,4 +45,9 @@ pub struct GemAtlas {
 #[derive(Resource, Default)]
 pub struct SelectionState {
     pub selected_gem: Option<Entity>,
+}
+
+#[derive(Resource, Default)]
+pub struct PendingSwap {
+    pub entities: Option<(Entity, Entity)>,
 }

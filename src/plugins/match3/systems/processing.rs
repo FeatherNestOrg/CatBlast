@@ -2,14 +2,37 @@ use std::collections::HashSet;
 use crate::plugins::match3::state::Match3State;
 use bevy::prelude::*;
 use crate::plugins::match3::components::{BlastAnimating, Gem, GemType, GridPosition};
-use crate::plugins::match3::resources::Board;
+use crate::plugins::match3::resources::{Board, PendingSwap};
+use crate::plugins::match3::systems::swap::{add_swap_animation, logical_swap};
 
-pub fn match_detection_system(
+pub fn process_board_state_system(
     mut commands: Commands,
-    q_gems: Query<(Entity, &GemType, &GridPosition), With<Gem>>,
-    board: Res<Board>,
+    mut param_set: ParamSet<(
+        Query<(Entity, &GemType, &mut GridPosition), With<Gem>>,
+        Query<&mut GridPosition>,
+        Query<&mut Transform>,
+    )>,
+    mut board: ResMut<Board>,
+    mut pending_swap: ResMut<PendingSwap>,
     mut next_state: ResMut<NextState<Match3State>>,
 ) {
+    let matches_to_remove = find_all_matches_on_board(&board, &param_set.p0());
+
+    if !matches_to_remove.is_empty() {
+        pending_swap.entities = None;
+        for entity in &matches_to_remove {
+            commands.entity(*entity).insert(BlastAnimating::new(0.3));
+        }
+        next_state.set(Match3State::Animating)
+    } else if let Some((e1, e2)) = pending_swap.entities.take() {
+        println!("No matches found, and there was a pending swap. Reverting.");
+        logical_swap(&mut board, &mut param_set.p1(), e1, e2);
+        add_swap_animation(&mut commands, &mut param_set.p2(), e1, e2);
+        next_state.set(Match3State::Animating);
+    } else { next_state.set(Match3State::AwaitingInput) }
+}
+
+pub fn find_all_matches_on_board(board: &Board, q_gems: &Query<(Entity, &GemType, &mut GridPosition), With<Gem>>) -> HashSet<Entity> {
     let mut matches_to_remove: HashSet<Entity> = HashSet::new();
 
     let mut gem_map: Vec<Vec<Option<(Entity, GemType)>>> = vec![vec![None; board.height as usize]; board.width as usize];
@@ -82,13 +105,5 @@ pub fn match_detection_system(
             }
         }
     }
-    for entity in &matches_to_remove {
-        commands.entity(*entity).insert(BlastAnimating::new(0.3));
-    }
-    if !matches_to_remove.is_empty() {
-        next_state.set(Match3State::BlastAnimating)
-    } else {
-        next_state.set(Match3State::AwaitingInput)
-    }
+    matches_to_remove
 }
-

@@ -1,9 +1,9 @@
 use crate::plugins::match3::components::{Gem, GemType, GridPosition};
 use crate::plugins::match3::message::{GemClickedEvent, RequestSwapEvent, SwapCompletedEvent};
-use crate::plugins::match3::resources::{GemAtlas, Match3Config, SelectionState};
+use crate::plugins::match3::resources::{GemAtlas, PendingSwap, Match3Config, SelectionState};
 use crate::plugins::match3::state::Match3State;
-use crate::plugins::match3::systems::animation::{check_swap_animation_completion_system, swap_animation_system, blast_animation_system, blast_particle_system, check_blast_animation_completion_system};
-use crate::plugins::match3::systems::detection::match_detection_system;
+use crate::plugins::match3::systems::animation::{swap_animation_system, blast_animation_system, blast_particle_system, check_animation_system};
+use crate::plugins::match3::systems::processing::process_board_state_system;
 use crate::plugins::match3::systems::input::{gem_input_system, gem_selection_system};
 use crate::plugins::match3::systems::swap::swap_system;
 use crate::plugins::match3::systems::visual::{
@@ -29,6 +29,7 @@ impl Plugin for Match3Plugin {
             .add_message::<SwapCompletedEvent>()
             .init_resource::<Match3Config>()
             .init_resource::<SelectionState>()
+            .init_resource::<PendingSwap>()
             .add_sub_state::<Match3State>()
             .add_systems(
                 OnEnter(GameState::Match3),
@@ -44,30 +45,21 @@ impl Plugin for Match3Plugin {
                     apply_selection_effect,
                     remove_selection_effect,
                 )
-                    .run_if(in_state(GameState::Match3)),
+                    .run_if(in_state(Match3State::AwaitingInput)),
             )
             .add_systems(
                 Update,
                 (
                     swap_animation_system,
-                    check_swap_animation_completion_system
-                )
-                    .chain()
-                    .run_if(in_state(Match3State::SwapAnimating)),
-            )
-            .add_systems(
-                Update,
-                (
                     blast_animation_system,
                     blast_particle_system,
-                    check_blast_animation_completion_system
+                    check_animation_system,
                 )
-                    .chain()
-                    .run_if(in_state(Match3State::BlastAnimating)),
+                    .run_if(in_state(Match3State::Animating)),
             )
             .add_systems(
-                Update,
-                (match_detection_system).run_if(in_state(Match3State::ProcessingMatches)),
+                OnEnter(Match3State::ProcessingBoard),
+                (process_board_state_system),
             )
             .add_systems(OnExit(GameState::Match3), cleanup_match3_scene);
     }
