@@ -13,6 +13,7 @@ use crate::state::GameState;
 use bevy::prelude::*;
 use bevy::render::view::Hdr;
 use resources::Board;
+use crate::plugins::match3::systems::regenerate::spawn_new_board;
 
 mod components;
 mod message;
@@ -83,41 +84,15 @@ fn setup_gem_atlas(
     })
 }
 
-fn setup_match3_scene(mut commands: Commands, gem_atlas: Res<GemAtlas>, config: Res<Match3Config>) {
+fn setup_match3_scene(mut commands: Commands, gem_atlas: Res<GemAtlas>, config: Res<Match3Config>, mut next_state: ResMut<NextState<Match3State>>) {
     tracing::info!("Entering Match3 Scene! Let's set up the board.");
     commands.spawn((Camera2d, Hdr));
 
     let board = Board::new(config.board_width, config.board_height);
 
-    for x in 0..board.width {
-        for y in 0..board.height {
-            let gem_type = GemType::random();
-
-            // 计算正确的图块索引 (第二行索引 = 类型索引 + 8)
-            let atlas_index = gem_type as usize + 8;
-
-            commands.spawn((
-                Sprite::from_atlas_image(
-                    gem_atlas.image.clone(),
-                    TextureAtlas {
-                        layout: gem_atlas.layout.clone(),
-                        index: atlas_index,
-                    },
-                ),
-                Transform::from_xyz(
-                    x as f32 * config.gem_size - (board.width as f32 * config.gem_size) / 2.0
-                        + config.gem_size / 2.0,
-                    y as f32 * config.gem_size - (board.height as f32 * config.gem_size) / 2.0
-                        + config.gem_size / 2.0,
-                    0.0,
-                ),
-                Gem,
-                GridPosition { x, y },
-                gem_type,
-            ));
-        }
-    }
+    spawn_new_board(&mut commands, &board, &gem_atlas, &config);
     commands.insert_resource(board);
+    next_state.set(Match3State::Animating);
 }
 
 fn cleanup_match3_scene(mut commands: Commands, query: Query<Entity, With<Gem>>) {

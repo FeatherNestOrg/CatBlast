@@ -1,10 +1,12 @@
 use crate::plugins::match3::components::{BlastAnimating, Gem, GemType, GridPosition};
-use crate::plugins::match3::resources::{Board, Match3Config, PendingSwap};
+use crate::plugins::match3::resources::{Board, GemAtlas, Match3Config, PendingSwap};
 use crate::plugins::match3::state::Match3State;
 use crate::plugins::match3::systems::swap::{add_swap_animation, logical_swap};
 use bevy::prelude::*;
 use std::collections::HashSet;
 use crate::plugins::match3::systems::gravity::apply_gravity;
+use crate::plugins::match3::systems::regenerate::{clear_all_gems, spawn_new_board};
+use crate::plugins::match3::systems::solver::has_possible_move;
 
 pub fn process_board_state_system(
     mut commands: Commands,
@@ -13,8 +15,11 @@ pub fn process_board_state_system(
         Query<&mut GridPosition>,
         Query<&mut Transform>,
         Query<(Entity, &mut GridPosition), With<Gem>>,
+        Query<Entity, With<Gem>>,
+        Query<(Entity, &GridPosition, &GemType), With<Gem>>,
     )>,
     mut board: ResMut<Board>,
+    gem_atlas: Res<GemAtlas>,
     config: Res<Match3Config>,
     mut pending_swap: ResMut<PendingSwap>,
     mut next_state: ResMut<NextState<Match3State>>,
@@ -38,7 +43,18 @@ pub fn process_board_state_system(
             info!("Applying gravity, gems falling.");
             next_state.set(Match3State::Animating);
         } else {
-            next_state.set(Match3State::AwaitingInput)
+            // 棋盘稳定，检查是否有可能的移动
+            let has_move = has_possible_move(&board, &param_set.p5());
+
+            if has_move {
+                // 有可能的移动，回到等待输入
+                next_state.set(Match3State::AwaitingInput)
+            } else {
+                info!("No possible moves detected! Regenerating board...");
+                clear_all_gems(&mut commands, &param_set.p4());
+                spawn_new_board(&mut commands, &board, &gem_atlas, &config);
+                next_state.set(Match3State::Animating);
+            }
         }
     }
 }
