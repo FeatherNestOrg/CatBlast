@@ -1,13 +1,15 @@
-use crate::plugins::match3::components::{SwapAnimating, GridPosition};
+use crate::plugins::match3::components::{SwapAnimating, GridPosition, Selected};
 use crate::plugins::match3::message::RequestSwapEvent;
 use crate::plugins::match3::resources::{Board, PendingSwap};
 use crate::plugins::match3::state::Match3State;
-use bevy::prelude::{Commands, Entity, MessageReader, NextState, Query, ResMut, Transform};
+use bevy::prelude::*;
+use bevy::sprite::Sprite;
 
 pub fn swap_system(
     mut swap_mr: MessageReader<RequestSwapEvent>,
     mut q_gems_pos: Query<&mut GridPosition>,
     mut q_gems_trans: Query<&mut Transform>,
+    mut q_gems_sprite: Query<&mut Sprite>,
     mut board: ResMut<Board>,
     mut pending_swap: ResMut<PendingSwap>,
     mut commands: Commands,
@@ -26,7 +28,18 @@ pub fn swap_system(
         logical_swap(&mut board, &mut q_gems_pos, e1, e2);
         add_swap_animation(&mut commands, &mut q_gems_trans, e1, e2);
 
+        if let Ok(mut sprite) = q_gems_sprite.get_mut(e1) {
+            sprite.color = Color::WHITE;
+        }
+        if let Ok(mut trans) = q_gems_trans.get_mut(e1) {
+            trans.scale = Vec3::splat(1.0);
+        }
+
+        // TODO: better handle with selected visual effect.
+
+
         pending_swap.entities = Some((e1, e2));
+        commands.entity(e1).remove::<Selected>();
         next_state.set(Match3State::Animating);
     }
     swap_mr.clear();
