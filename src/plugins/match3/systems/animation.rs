@@ -1,4 +1,4 @@
-use crate::plugins::match3::components::{spawn_blast_particles, BlastAnimating, BlastParticle, SwapAnimating};
+use crate::plugins::match3::components::{spawn_blast_particles, BlastAnimating, BlastParticle, FallAnimating, SwapAnimating};
 use crate::plugins::match3::state::Match3State;
 use bevy::prelude::*;
 use bevy::time::Time;
@@ -60,14 +60,36 @@ pub fn blast_particle_system(
     }
 }
 
+pub fn falling_animation_system(
+    mut commands: Commands,
+    mut q_falling: Query<(Entity, &mut Transform, &mut FallAnimating)>,
+    time: Res<Time>,
+) {
+    for (entity, mut transform, mut fall) in q_falling {
+        fall.timer.tick(time.delta());
+        let progress = fall.timer.fraction();
+        let eased_progress = 1.0 - (1.0 - progress).powi(3);
+
+        // 使用缓动进度计算当前位置
+        transform.translation.x = fall.start_pos.x + (fall.end_pos.x - fall.start_pos.x) * eased_progress;
+        transform.translation.y = fall.start_pos.y + (fall.end_pos.y - fall.start_pos.y) * eased_progress;
+
+        if fall.timer.just_finished() {
+            transform.translation.x = fall.end_pos.x;
+            transform.translation.y = fall.end_pos.y;
+            commands.entity(entity).remove::<FallAnimating>();
+        }
+    }
+}
 
 pub fn check_animation_system(
     q_swap: Query<&SwapAnimating>,
     q_blast: Query<&BlastAnimating>,
     q_particle: Query<&BlastParticle>,
+    q_fall: Query<&FallAnimating>,
     mut next_state: ResMut<NextState<Match3State>>,
 ) {
-    if q_swap.is_empty() && q_blast.is_empty() && q_particle.is_empty() {
+    if q_swap.is_empty() && q_blast.is_empty() && q_particle.is_empty() && q_fall.is_empty() {
         next_state.set(ProcessingBoard);
     }
 }

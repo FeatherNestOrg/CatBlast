@@ -1,9 +1,10 @@
 use crate::plugins::match3::components::{BlastAnimating, Gem, GemType, GridPosition};
-use crate::plugins::match3::resources::{Board, PendingSwap};
+use crate::plugins::match3::resources::{Board, Match3Config, PendingSwap};
 use crate::plugins::match3::state::Match3State;
 use crate::plugins::match3::systems::swap::{add_swap_animation, logical_swap};
 use bevy::prelude::*;
 use std::collections::HashSet;
+use crate::plugins::match3::systems::gravity::apply_gravity;
 
 pub fn process_board_state_system(
     mut commands: Commands,
@@ -11,8 +12,10 @@ pub fn process_board_state_system(
         Query<(Entity, &GemType, &mut GridPosition), With<Gem>>,
         Query<&mut GridPosition>,
         Query<&mut Transform>,
+        Query<(Entity, &mut GridPosition), With<Gem>>,
     )>,
     mut board: ResMut<Board>,
+    config: Res<Match3Config>,
     mut pending_swap: ResMut<PendingSwap>,
     mut next_state: ResMut<NextState<Match3State>>,
 ) {
@@ -30,7 +33,13 @@ pub fn process_board_state_system(
         add_swap_animation(&mut commands, &mut param_set.p2(), e1, e2);
         next_state.set(Match3State::Animating);
     } else {
-        next_state.set(Match3State::AwaitingInput)
+        let has_gravity = apply_gravity(&mut commands, &mut param_set.p3(), &board, &config);
+        if has_gravity {
+            info!("Applying gravity, gems falling.");
+            next_state.set(Match3State::Animating);
+        } else {
+            next_state.set(Match3State::AwaitingInput)
+        }
     }
 }
 

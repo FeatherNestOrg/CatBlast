@@ -115,6 +115,24 @@ pub fn spawn_blast_particles(
 }
 
 #[derive(Component)]
+pub struct FallAnimating {
+    pub start_pos: Vec2,
+    pub end_pos: Vec2,
+    pub timer: Timer,
+}
+
+impl FallAnimating {
+    pub fn new(start_pos: Vec2, end_pos: Vec2, duration_secs: f32) -> Self {
+        Self { start_pos, end_pos, timer: Timer::from_seconds(duration_secs, Once) }
+    }
+}
+
+#[derive(Component)]
+pub struct BoardClearAnimating {
+    pub timer: Timer,
+}
+
+#[derive(Component)]
 pub struct Selected {
     pub timer: Timer,
 }
