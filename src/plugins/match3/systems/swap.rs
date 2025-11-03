@@ -1,3 +1,4 @@
+use bevy::math::{i32};
 use crate::plugins::match3::components::{SwapAnimating, GridPosition, Selected};
 use crate::plugins::match3::message::RequestSwapEvent;
 use crate::plugins::match3::resources::{Board, PendingSwap};
@@ -24,7 +25,6 @@ pub fn swap_system(
         let e1 = event.entity1;
         let e2 = event.entity2;
 
-
         logical_swap(&mut board, &mut q_gems_pos, e1, e2);
         add_swap_animation(&mut commands, &mut q_gems_trans, e1, e2);
 
@@ -44,7 +44,14 @@ pub fn swap_system(
     }
     swap_mr.clear();
 }
-
+pub fn check_swap(board: &mut Board, q_gems_pos: &mut Query<&mut GridPosition>, e1: Entity, e2: Entity) -> bool {
+    if let Ok([pos1, pos2]) = q_gems_pos.get_many_mut([e1, e2]) {
+        let dx = i32::abs(pos1.x as i32 - pos2.x as i32);
+        let dy = i32::abs(pos1.y as i32 - pos2.y as i32);
+        return (dx == 1 && dy == 0) || (dx == 0 && dy == 1);
+    }
+    false
+}
 pub fn logical_swap(board: &mut Board, q_gems_pos: &mut Query<&mut GridPosition>, e1: Entity, e2: Entity) {
     if let Ok([mut pos1, mut pos2]) = q_gems_pos.get_many_mut([e1, e2]) {
         std::mem::swap(&mut *pos1, &mut *pos2);

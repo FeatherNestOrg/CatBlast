@@ -3,6 +3,8 @@ use crate::plugins::match3::message::{GemClickedEvent, RequestSwapEvent};
 use crate::plugins::match3::resources::{Board, Match3Config, SelectionState};
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
+use crate::plugins::match3::systems::swap::check_swap;
+
 pub fn gem_input_system(
     mouse_button_input: Res<ButtonInput<MouseButton>>,
     q_window: Query<&Window, With<PrimaryWindow>>,
@@ -46,10 +48,9 @@ pub fn gem_input_system(
 
         for (gem_entity, grid_pos) in gem_query.iter() {
             if grid_pos.x == grid_x && grid_pos.y == grid_y {
-                // 找到了！发送点击事件
-                tracing::debug!("Clicked on gem at ({}, {})", grid_x, grid_y);
+                debug!("Clicked on gem at ({}, {})", grid_x, grid_y);
                 clicked_mw.write(GemClickedEvent { gem_entity });
-                return; // 找到后即可退出
+                return;
             }
         }
     }
@@ -60,7 +61,8 @@ pub fn gem_selection_system(
     mut selection_state: ResMut<SelectionState>,
     mut clicked_mr: MessageReader<GemClickedEvent>,
     mut swap_mw: MessageWriter<RequestSwapEvent>,
-    q_selected: Query<Entity, With<Selected>>,
+    mut board: ResMut<Board>,
+    mut q_gems_pos: Query<&mut GridPosition>,
 ) {
     for event in clicked_mr.read() {
         let clicked_entity = event.gem_entity;
@@ -72,11 +74,16 @@ pub fn gem_selection_system(
             }
             Some(first_entity) => {
                 if first_entity == clicked_entity {
-                    tracing::debug!("Deselected gem.");
+                    debug!("Deselected gem.");
                     selection_state.selected_gem = None;
                     commands.entity(first_entity).remove::<Selected>();
+                } else if !check_swap(&mut board, &mut q_gems_pos, clicked_entity, first_entity) {
+                    debug!("Can't swap, select another");
+                    selection_state.selected_gem = Some(clicked_entity);
+                    commands.entity(clicked_entity).insert(Selected::default());
+                    commands.entity(first_entity).remove::<Selected>();
                 } else {
-                    tracing::debug!("Selected second gem. Requesting swap.");
+                    debug!("Selected second gem. Requesting swap.");
 
                     swap_mw.write(RequestSwapEvent {
                         entity1: first_entity,
