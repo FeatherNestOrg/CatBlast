@@ -3,12 +3,20 @@ use crate::plugins::core::resources::DisplaySettings;
 use crate::plugins::ui::settings::components::{OnSettingsScreen, SettingsButtonAction};
 use crate::state::GameState;
 use bevy::prelude::*;
-use bevy::window::WindowMode;
+use bevy::window::{MonitorSelection, WindowMode};
 
 const NORMAL_BUTTON: Color = Color::srgb(0.15, 0.15, 0.15);
 const HOVERED_BUTTON: Color = Color::srgb(0.25, 0.25, 0.25);
 const PRESSED_BUTTON: Color = Color::srgb(0.35, 0.75, 0.35);
 const SELECTED_BUTTON: Color = Color::srgb(0.2, 0.5, 0.2);
+
+fn window_mode_to_chinese(mode: WindowMode) -> &'static str {
+    match mode {
+        WindowMode::Windowed => "窗口模式",
+        WindowMode::BorderlessFullscreen(_) => "无边框全屏",
+        WindowMode::Fullscreen(_, _) => "全屏",
+    }
+}
 
 pub fn setup_settings_ui(
     mut commands: Commands,
@@ -81,7 +89,7 @@ pub fn setup_settings_ui(
                     ))
                     .with_children(|button| {
                         button.spawn((
-                            Text::new(format!("{}", resolution)),
+                            Text::new(resolution.to_string()),
                             font.clone(),
                             TextLayout::new_with_justify(Justify::Center),
                         ));
@@ -96,7 +104,7 @@ pub fn setup_settings_ui(
 
             // Window mode section
             parent.spawn((
-                Text::new(format!("窗口模式: {:?}", display_settings.window_mode)),
+                Text::new(format!("窗口模式: {}", window_mode_to_chinese(display_settings.window_mode))),
                 font.clone(),
                 TextColor(Color::WHITE),
                 TextLayout::new_with_justify(Justify::Center),
