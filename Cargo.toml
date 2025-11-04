@@ -18,7 +18,7 @@ opt-level = 1
 opt-level = 3
 
 [dependencies]
-bevy = "0.17"
+bevy = { version = "0.17", features = ["dynamic_linking"] }
 rand = "0"
 
 tracing = "0.1"

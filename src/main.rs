@@ -4,6 +4,7 @@ mod state;
 use crate::state::GameState;
 use bevy::prelude::*;
 use plugins::match3::Match3Plugin;
+use plugins::ui::main_menu::MainMenuPlugin;
 use tracing_subscriber::EnvFilter;
 
 fn main() {
@@ -26,9 +27,8 @@ fn main() {
     }
 
     App::new()
-        .add_plugins(DefaultPlugins)
-        .add_plugins(Match3Plugin)
+        .add_plugins((DefaultPlugins, Match3Plugin, MainMenuPlugin))
         .init_state::<GameState>()
-        .insert_state(GameState::Match3)
+        .insert_state(GameState::MainMenu)
         .run();
 }
