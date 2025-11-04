@@ -9,7 +9,7 @@ on:
       tag:
         description: 'Tag name to create a release for (when dispatching)'
         required: true
-        default: ''
+        default: 'v0.0.0-dev'
       release_name:
         description: 'Release name (optional)'
         required: false
@@ -52,7 +52,7 @@ jobs:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
-          key: cargo-registry-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
+          key: cargo-registry-${{ runner.os }}-${{ hashFiles('**/Cargo.lock', '**/Cargo.toml') }}
 
       - name: Set up Rust
         uses: dtolnay/rust-toolchain@stable
@@ -114,19 +114,13 @@ jobs:
             NAME="${{ github.event.inputs.release_name }}"
             PRERELEASE="${{ github.event.inputs.prerelease }}"
           else
-            TAG="${GITHUB_REF_NAME:-${GITHUB_REF##*/}}"
+            TAG="${GITHUB_REF_NAME}"
             NAME=""
             PRERELEASE="false"
           fi
           echo "tag=$TAG" >> $GITHUB_OUTPUT
           echo "name=$NAME" >> $GITHUB_OUTPUT
           echo "prerelease=$PRERELEASE" >> $GITHUB_OUTPUT
-        shell: bash
-
-      - name: Display downloaded artifacts
-        run: |
-          echo "Downloaded artifacts:"
-          ls -R dist/
         shell: bash
 
       - name: Create or update release
