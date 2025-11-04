@@ -5,5 +5,6 @@ use bevy::prelude::*;
 pub enum GameState {
     #[default]
     MainMenu,
+    Settings,
     Match3,
 }
