@@ -83,8 +83,8 @@ pub fn button_interaction_system(
                         next_state.set(GameState::Match3);
                     }
                     MainMenuButtonAction::Settings => {
-                        info!("设置按钮被点击! ");
-                        //TODO: Logic here
+                        info!("设置按钮被点击, 切换到设置界面");
+                        next_state.set(GameState::Settings);
                     }
                     MainMenuButtonAction::Quit => {
                         app_exit_mw.write(AppExit::Success);
