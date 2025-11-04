@@ -31,7 +31,7 @@ jobs:
       contents: read
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ ubuntu-latest, macos-latest, windows-latest ]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -73,7 +73,7 @@ jobs:
       - name: Prepare package directory (Windows)
         if: runner.os == 'Windows'
         run: |
-          New-Item -ItemType Directory -Force -Path dist\${{ matrix.os }}
+          New-Item -ItemType Directory -Force -Path dist\${{ matrix.os }} | Out-Null
           Copy-Item target\release\CatBlast.exe dist\${{ matrix.os }}\
           Copy-Item -Recurse assets dist\${{ matrix.os }}\assets
         shell: powershell
