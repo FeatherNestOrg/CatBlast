@@ -1,5 +1,5 @@
 use crate::plugins::core::messages::ApplyDisplaySettingsEvent;
-use crate::plugins::core::resources::DisplaySettings;
+use crate::plugins::core::resources::{DisplaySettings, Resolution};
 use crate::plugins::ui::settings::components::{OnSettingsScreen, SettingsButtonAction};
 use crate::state::GameState;
 use bevy::prelude::*;
@@ -18,6 +18,20 @@ fn window_mode_to_chinese(mode: WindowMode) -> &'static str {
     }
 }
 
+fn get_resolution_by_flat_index(
+    settings: &DisplaySettings,
+    mut flat_index: usize,
+) -> Option<Resolution> {
+    for monitor in &settings.monitor_infos {
+        if flat_index < monitor.resolutions.len() {
+            return Some(monitor.resolutions[flat_index]);
+        } else {
+            flat_index -= monitor.resolutions.len();
+        }
+    }
+    None
+}
+
 pub fn setup_settings_ui(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
@@ -27,6 +41,13 @@ pub fn setup_settings_ui(
         font: asset_server.load("fonts/ZCOOLKuaiLe-Regular.ttf"),
         ..default()
     };
+
+    let mut flat_resolutions: Vec<Resolution> = Vec::new();
+    for monitor in &display_settings.monitor_infos {
+        for &res in &monitor.resolutions {
+            flat_resolutions.push(res);
+        }
+    }
 
     // Root node
     commands
@@ -65,7 +86,7 @@ pub fn setup_settings_ui(
             ));
 
             // Resolution buttons
-            for (index, resolution) in display_settings.monitor_resolutions.iter().enumerate() {
+            for (index, resolution) in flat_resolutions.iter().enumerate() {
                 let is_selected = *resolution == display_settings.current_resolution;
                 let button_color = if is_selected {
                     SELECTED_BUTTON
@@ -104,7 +125,10 @@ pub fn setup_settings_ui(
 
             // Window mode section
             parent.spawn((
-                Text::new(format!("窗口模式: {}", window_mode_to_chinese(display_settings.window_mode))),
+                Text::new(format!(
+                    "窗口模式: {}",
+                    window_mode_to_chinese(display_settings.window_mode)
+                )),
                 font.clone(),
                 TextColor(Color::WHITE),
                 TextLayout::new_with_justify(Justify::Center),
@@ -164,7 +188,10 @@ pub fn setup_settings_ui(
 }
 
 pub fn settings_button_interaction_system(
-    mut q_interaction: Query<(&Interaction, &mut BackgroundColor, &SettingsButtonAction)>,
+    mut q_interaction: Query<
+        (&Interaction, &mut BackgroundColor, &SettingsButtonAction),
+        (Changed<Interaction>, With<Button>),
+    >,
     mut next_state: ResMut<NextState<GameState>>,
     mut apply_settings_writer: MessageWriter<ApplyDisplaySettingsEvent>,
     display_settings: Res<DisplaySettings>,
@@ -175,7 +202,8 @@ pub fn settings_button_interaction_system(
                 *color = PRESSED_BUTTON.into();
                 match action {
                     SettingsButtonAction::SelectResolution(index) => {
-                        if let Some(&resolution) = display_settings.monitor_resolutions.get(*index)
+                        if let Some(resolution) =
+                            get_resolution_by_flat_index(&display_settings, *index)
                         {
                             info!("Selected resolution: {}", resolution);
                             apply_settings_writer.write(ApplyDisplaySettingsEvent {
@@ -186,7 +214,9 @@ pub fn settings_button_interaction_system(
                     }
                     SettingsButtonAction::ToggleWindowMode => {
                         let new_mode = match display_settings.window_mode {
-                            WindowMode::Windowed => WindowMode::BorderlessFullscreen(MonitorSelection::Current),
+                            WindowMode::Windowed => {
+                                WindowMode::BorderlessFullscreen(MonitorSelection::Current)
+                            }
                             WindowMode::BorderlessFullscreen(_) => WindowMode::Windowed,
                             WindowMode::Fullscreen(_, _) => WindowMode::Windowed,
                         };
@@ -208,7 +238,9 @@ pub fn settings_button_interaction_system(
             Interaction::None => {
                 // Check if this resolution button should be highlighted as selected
                 if let SettingsButtonAction::SelectResolution(index) = action {
-                    if let Some(&resolution) = display_settings.monitor_resolutions.get(*index) {
+                    if let Some(resolution) =
+                        get_resolution_by_flat_index(&display_settings, *index)
+                    {
                         if resolution == display_settings.current_resolution {
                             *color = SELECTED_BUTTON.into();
                             continue;

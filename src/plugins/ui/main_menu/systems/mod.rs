@@ -69,7 +69,10 @@ pub fn setup_main_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
 }
 
 pub fn button_interaction_system(
-    mut q_interaction: Query<(&Interaction, &mut BackgroundColor, &MainMenuButtonAction)>,
+    mut q_interaction: Query<
+        (&Interaction, &mut BackgroundColor, &MainMenuButtonAction),
+        (Changed<Interaction>, With<Button>),
+    >,
     mut next_state: ResMut<NextState<GameState>>,
     mut app_exit_mw: MessageWriter<AppExit>,
 ) {

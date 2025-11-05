@@ -1,22 +1,38 @@
-use std::collections::BTreeSet;
-use crate::plugins::core::resources::{DisplaySettings, Resolution};
+use crate::plugins::core::messages::ApplyDisplaySettingsEvent;
+use crate::plugins::core::resources::{DisplaySettings, MonitorInfo, Resolution};
 use bevy::prelude::*;
 use bevy::window::{Monitor, PrimaryWindow};
-use crate::plugins::core::messages::ApplyDisplaySettingsEvent;
 
-
-pub fn setup_display_settings(
-    mut commands: Commands,
-    monitors: Query<(Entity, &Monitor)>,
-) {
+pub fn setup_display_settings(mut commands: Commands, monitors: Query<(Entity, &Monitor)>) {
     let mut settings = DisplaySettings::default();
 
+    let mut info: Vec<MonitorInfo> = Vec::new();
     for (entity, monitor) in monitors.iter() {
-        let mut set: BTreeSet<(u32, u32)> = BTreeSet::new();
-       if let Some(vm) = monitor.video_modes.
+        debug!("Found monitor: {:?}", monitor);
+        let mut resolutions: Vec<Resolution> = Vec::new();
+        for modes in monitor.video_modes.iter() {
+            resolutions.push(Resolution {
+                width: modes.physical_size.x,
+                height: modes.physical_size.y,
+            });
+        }
+        info.push(MonitorInfo {
+            entity,
+            name: monitor.name.clone(),
+            resolutions,
+        });
     }
-    settings.current_resolution = settings.monitor_resolutions
-    commands.insert_resource(settings);
+    settings.monitor_infos = info;
+    settings.current_resolution = settings
+        .monitor_infos
+        .first()
+        .and_then(|m| m.resolutions.first())
+        .cloned()
+        .unwrap_or(Resolution {
+            width: 800,
+            height: 600,
+        });
+    commands.insert_resource(settings)
 }
 
 /// System that listens for ApplyDisplaySettingsEvent and applies window/resolution changes
@@ -37,9 +53,10 @@ pub fn apply_display_settings_system(
 
         // Apply to the primary window
         if let Ok(mut window) = primary_window.single_mut() {
-            window
-                .resolution
-                .set(event.resolution.width as f32, event.resolution.height as f32);
+            window.resolution.set(
+                event.resolution.width as f32,
+                event.resolution.height as f32,
+            );
             window.mode = event.window_mode;
 
             info!(
