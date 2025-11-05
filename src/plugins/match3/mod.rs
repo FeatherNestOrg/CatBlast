@@ -1,4 +1,5 @@
-use crate::plugins::match3::components::{Gem, GemType, GridPosition};
+use crate::plugins::match3::components::{GridPosition};
+use crate::plugins::match3::components::gem::{Gem, GemType};
 use crate::plugins::match3::message::{GemClickedEvent, RequestSwapEvent, SwapCompletedEvent};
 use crate::plugins::match3::resources::{GemAtlas, Match3Config, PendingSwap, SelectionState};
 use crate::plugins::match3::state::Match3State;

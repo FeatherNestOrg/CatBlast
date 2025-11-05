@@ -1,4 +1,4 @@
-use crate::plugins::match3::components::{Gem, Selected};
+use crate::plugins::match3::components::{Selected};
 use bevy::prelude::*;
 
 const SELECTED_SCALE: f32 = 1.15; // 选中时放大 15%

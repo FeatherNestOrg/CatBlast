@@ -1,4 +1,4 @@
-use crate::plugins::match3::components::{spawn_blast_particles, BlastAnimating, BlastParticle, FallAnimating, SwapAnimating};
+use crate::plugins::match3::components::animation::{spawn_blast_particles, BlastAnimating, BlastParticle, FallAnimating, SwapAnimating};
 use crate::plugins::match3::state::Match3State;
 use bevy::prelude::*;
 use bevy::time::Time;

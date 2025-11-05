@@ -1,9 +1,11 @@
-use crate::plugins::match3::components::{BlastAnimating, Gem, GemType, GridPosition};
+use crate::plugins::match3::components::animation::{BlastAnimating};
 use crate::plugins::match3::resources::{Board, GemAtlas, Match3Config, PendingSwap};
 use crate::plugins::match3::state::Match3State;
 use crate::plugins::match3::systems::swap::{add_swap_animation, logical_swap};
 use bevy::prelude::*;
 use std::collections::HashSet;
+use crate::plugins::match3::components::gem::{Gem, GemType};
+use crate::plugins::match3::components::GridPosition;
 use crate::plugins::match3::systems::gravity::apply_gravity;
 use crate::plugins::match3::systems::regenerate::{clear_all_gems, spawn_new_board};
 use crate::plugins::match3::systems::solver::has_possible_move;

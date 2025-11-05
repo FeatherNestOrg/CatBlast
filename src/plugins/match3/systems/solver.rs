@@ -1,6 +1,8 @@
-use crate::plugins::match3::components::{Gem, GemType, GridPosition};
+use crate::plugins::match3::components::{GridPosition};
 use crate::plugins::match3::resources::Board;
 use bevy::prelude::*;
+use crate::plugins::match3::components::gem::{Gem, GemType};
+
 pub fn has_possible_move(
     board: &Board,
     q_gems: &Query<(Entity, &GridPosition, &GemType), With<Gem>>,

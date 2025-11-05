@@ -1,10 +1,11 @@
 use bevy::math::{i32};
-use crate::plugins::match3::components::{SwapAnimating, GridPosition, Selected};
+use crate::plugins::match3::components::{GridPosition, Selected};
 use crate::plugins::match3::message::RequestSwapEvent;
 use crate::plugins::match3::resources::{Board, PendingSwap};
 use crate::plugins::match3::state::Match3State;
 use bevy::prelude::*;
 use bevy::sprite::Sprite;
+use crate::plugins::match3::components::animation::SwapAnimating;
 
 pub fn swap_system(
     mut swap_mr: MessageReader<RequestSwapEvent>,

@@ -1,9 +1,10 @@
-use crate::plugins::match3::components::{Gem, GridPosition, Selected};
+use crate::plugins::match3::components::{GridPosition, Selected};
 use crate::plugins::match3::message::{GemClickedEvent, RequestSwapEvent};
 use crate::plugins::match3::resources::{Board, Match3Config, SelectionState};
 use crate::plugins::match3::systems::swap::check_swap;
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
+use crate::plugins::match3::components::gem::Gem;
 
 pub fn gem_input_system(
     mouse_button_input: Res<ButtonInput<MouseButton>>,

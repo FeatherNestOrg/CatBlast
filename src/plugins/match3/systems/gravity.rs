@@ -1,5 +1,7 @@
 use bevy::prelude::*;
-use crate::plugins::match3::components::{FallAnimating, Gem, GridPosition};
+use crate::plugins::match3::components::{GridPosition};
+use crate::plugins::match3::components::animation::FallAnimating;
+use crate::plugins::match3::components::gem::Gem;
 use crate::plugins::match3::resources::{Board, Match3Config};
 
 pub fn apply_gravity(

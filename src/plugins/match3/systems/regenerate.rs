@@ -1,5 +1,7 @@
 use bevy::prelude::*;
-use crate::plugins::match3::components::{FallAnimating, Gem, GemType, GridPosition, OnMatch3Scene};
+use crate::plugins::match3::components::{GridPosition, OnMatch3Scene};
+use crate::plugins::match3::components::animation::FallAnimating;
+use crate::plugins::match3::components::gem::{Gem, GemType};
 use crate::plugins::match3::resources::{Board, GemAtlas, Match3Config};
 
 pub fn clear_all_gems(commands: &mut Commands, q_gems: &Query<Entity, With<Gem>>) {
