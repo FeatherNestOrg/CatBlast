@@ -5,6 +5,9 @@ use rand::Rng;
 #[derive(Component)]
 pub struct Gem;
 
+#[derive(Component)]
+pub struct OnMatch3Scene;
+
 #[derive(Component, Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GridPosition {
     pub x: u32,

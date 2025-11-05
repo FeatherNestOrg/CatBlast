@@ -86,7 +86,7 @@ fn setup_gem_atlas(
 
 fn setup_match3_scene(mut commands: Commands, gem_atlas: Res<GemAtlas>, config: Res<Match3Config>, mut next_state: ResMut<NextState<Match3State>>) {
     tracing::info!("Entering Match3 Scene! Let's set up the board.");
-    commands.spawn((Camera2d, Hdr));
+    commands.spawn((Camera2d, Hdr, components::OnMatch3Scene));
 
     let board = Board::new(config.board_width, config.board_height);
 
@@ -95,7 +95,7 @@ fn setup_match3_scene(mut commands: Commands, gem_atlas: Res<GemAtlas>, config: 
     next_state.set(Match3State::Animating);
 }
 
-fn cleanup_match3_scene(mut commands: Commands, query: Query<Entity, With<Gem>>) {
+fn cleanup_match3_scene(mut commands: Commands, query: Query<Entity, With<components::OnMatch3Scene>>) {
     tracing::info!("Cleaning up Match3 Scene.");
     for entity in query.iter() {
         commands.entity(entity).despawn();

@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use crate::plugins::match3::components::{FallAnimating, Gem, GemType, GridPosition};
+use crate::plugins::match3::components::{FallAnimating, Gem, GemType, GridPosition, OnMatch3Scene};
 use crate::plugins::match3::resources::{Board, GemAtlas, Match3Config};
 
 pub fn clear_all_gems(commands: &mut Commands, q_gems: &Query<Entity, With<Gem>>) {
@@ -45,6 +45,7 @@ pub fn spawn_new_board(
                 ),
                 Transform::from_xyz(final_world_x, start_world_y, 0.0),
                 Gem,
+                OnMatch3Scene,
                 GridPosition { x, y },
                 gem_type,
                 // 添加下落动画，让宝石从上方掉下来

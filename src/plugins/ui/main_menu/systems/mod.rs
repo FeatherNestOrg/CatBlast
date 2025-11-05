@@ -6,9 +6,7 @@ const NORMAL_BUTTON: Color = Color::srgb(0.15, 0.15, 0.15);
 const HOVERED_BUTTON: Color = Color::srgb(0.25, 0.25, 0.25);
 const PRESSED_BUTTON: Color = Color::srgb(0.35, 0.75, 0.35);
 pub fn setup_main_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
-    // Ensure there's a 2D camera for the UI to render to (Match3 setup spawns its own camera,
-    // but the main menu needs one when the game starts in the MainMenu state).
-    commands.spawn((Camera2d,));
+    commands.spawn((Camera2d, OnMainMenuScreen));
     let font = TextFont {
         font: asset_server.load("fonts/ZCOOLKuaiLe-Regular.ttf"),
         ..default()
@@ -25,7 +23,7 @@ pub fn setup_main_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
                 flex_direction: FlexDirection::Column, // 纵向排列
                 ..default()
             },
-            OnMainMenuScreen, // 标记这是主菜单的UI
+            OnMainMenuScreen,
         ))
         .with_children(|builder| {
             // 游戏标题
