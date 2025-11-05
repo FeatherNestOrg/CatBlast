@@ -1,9 +1,9 @@
 use crate::plugins::match3::components::{Gem, GridPosition, Selected};
 use crate::plugins::match3::message::{GemClickedEvent, RequestSwapEvent};
 use crate::plugins::match3::resources::{Board, Match3Config, SelectionState};
+use crate::plugins::match3::systems::swap::check_swap;
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
-use crate::plugins::match3::systems::swap::check_swap;
 
 pub fn gem_input_system(
     mouse_button_input: Res<ButtonInput<MouseButton>>,
@@ -17,10 +17,13 @@ pub fn gem_input_system(
     if !mouse_button_input.just_pressed(MouseButton::Left) {
         return;
     }
+    info!("gem_input_system: mouse left pressed");
     let Ok(window) = q_window.single() else {
+        warn!("gem_input_system: no primary window");
         return;
     };
     let Ok((camera, camera_transform)) = q_camera.single() else {
+        warn!("gem_input_system: no Camera2d found");
         return;
     };
 
