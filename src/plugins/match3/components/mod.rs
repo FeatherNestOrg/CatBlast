@@ -1,6 +1,7 @@
 pub mod character;
 pub mod gem;
 pub mod animation;
+pub mod hud;
 
 use bevy::prelude::*;
 use bevy::prelude::TimerMode::Once;

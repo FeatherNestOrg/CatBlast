@@ -18,7 +18,7 @@ pub fn gem_input_system(
     if !mouse_button_input.just_pressed(MouseButton::Left) {
         return;
     }
-    info!("gem_input_system: mouse left pressed");
+    debug!("gem_input_system: mouse left pressed");
     let Ok(window) = q_window.single() else {
         warn!("gem_input_system: no primary window");
         return;

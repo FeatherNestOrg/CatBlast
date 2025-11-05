@@ -12,4 +12,4 @@ pub use gem_atlas::GemAtlas;
 pub use selection::SelectionState;
 pub use swap::PendingSwap;
 pub use score::{Score, Combo};
-
+pub use hud::{HudLayout};

@@ -6,4 +6,4 @@ pub mod visual;
 mod gravity;
 mod solver;
 pub mod regenerate;
-mod hud;
+pub mod hud;
