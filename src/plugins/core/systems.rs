@@ -1,26 +1,22 @@
-use crate::plugins::core::events::ApplyDisplaySettingsEvent;
+use std::collections::BTreeSet;
 use crate::plugins::core::resources::{DisplaySettings, Resolution};
 use bevy::prelude::*;
-use bevy::window::PrimaryWindow;
+use bevy::window::{Monitor, PrimaryWindow};
+use crate::plugins::core::messages::ApplyDisplaySettingsEvent;
 
-/// System that runs at startup to detect and store available display configurations
+
 pub fn setup_display_settings(
     mut commands: Commands,
-    primary_window: Query<&Window, With<PrimaryWindow>>,
+    monitors: Query<(Entity, &Monitor)>,
 ) {
     let mut settings = DisplaySettings::default();
 
-    // Get current window resolution if available
-    if let Ok(window) = primary_window.single() {
-        settings.current_resolution = Resolution::new(
-            window.resolution.width() as u32,
-            window.resolution.height() as u32,
-        );
-        settings.window_mode = window.mode;
+    for (entity, monitor) in monitors.iter() {
+        let mut set: BTreeSet<(u32, u32)> = BTreeSet::new();
+       if let Some(vm) = monitor.video_modes.
     }
-
+    settings.current_resolution = settings.monitor_resolutions
     commands.insert_resource(settings);
-    info!("Display settings initialized");
 }
 
 /// System that listens for ApplyDisplaySettingsEvent and applies window/resolution changes

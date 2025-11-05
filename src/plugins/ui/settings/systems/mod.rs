@@ -1,4 +1,4 @@
-use crate::plugins::core::events::ApplyDisplaySettingsEvent;
+use crate::plugins::core::messages::ApplyDisplaySettingsEvent;
 use crate::plugins::core::resources::DisplaySettings;
 use crate::plugins::ui::settings::components::{OnSettingsScreen, SettingsButtonAction};
 use crate::state::GameState;
@@ -65,7 +65,7 @@ pub fn setup_settings_ui(
             ));
 
             // Resolution buttons
-            for (index, resolution) in display_settings.available_resolutions.iter().enumerate() {
+            for (index, resolution) in display_settings.monitor_resolutions.iter().enumerate() {
                 let is_selected = *resolution == display_settings.current_resolution;
                 let button_color = if is_selected {
                     SELECTED_BUTTON
@@ -175,7 +175,7 @@ pub fn settings_button_interaction_system(
                 *color = PRESSED_BUTTON.into();
                 match action {
                     SettingsButtonAction::SelectResolution(index) => {
-                        if let Some(&resolution) = display_settings.available_resolutions.get(*index)
+                        if let Some(&resolution) = display_settings.monitor_resolutions.get(*index)
                         {
                             info!("Selected resolution: {}", resolution);
                             apply_settings_writer.write(ApplyDisplaySettingsEvent {
@@ -208,7 +208,7 @@ pub fn settings_button_interaction_system(
             Interaction::None => {
                 // Check if this resolution button should be highlighted as selected
                 if let SettingsButtonAction::SelectResolution(index) = action {
-                    if let Some(&resolution) = display_settings.available_resolutions.get(*index) {
+                    if let Some(&resolution) = display_settings.monitor_resolutions.get(*index) {
                         if resolution == display_settings.current_resolution {
                             *color = SELECTED_BUTTON.into();
                             continue;

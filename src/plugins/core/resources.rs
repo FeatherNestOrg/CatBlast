@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use bevy::prelude::*;
 use bevy::window::WindowMode;
 
@@ -20,10 +21,20 @@ impl std::fmt::Display for Resolution {
     }
 }
 
+#[derive(Debug, Clone)]
+pub struct MonitorInfo {
+    pub entity: Entity,
+    pub name: Option<String>,
+    pub resolutions: Vec<Resolution>,
+}
+
+#[derive(Default, Resource)]
+pub struct MonitorResolutions(pub Vec<MonitorInfo>);
+
 /// Resource storing all display-related settings
 #[derive(Resource)]
 pub struct DisplaySettings {
-    pub available_resolutions: Vec<Resolution>,
+    pub monitor_resolutions: MonitorResolutions,
     pub current_resolution: Resolution,
     pub window_mode: WindowMode,
 }
@@ -31,12 +42,7 @@ pub struct DisplaySettings {
 impl Default for DisplaySettings {
     fn default() -> Self {
         Self {
-            available_resolutions: vec![
-                Resolution::new(800, 600),
-                Resolution::new(1024, 768),
-                Resolution::new(1280, 720),
-                Resolution::new(1920, 1080),
-            ],
+            monitor_resolutions: default(),
             current_resolution: Resolution::new(1280, 720),
             window_mode: WindowMode::Windowed,
         }
