@@ -48,16 +48,10 @@ jobs:
             libwayland-dev \
             libxkbcommon-dev
 
-      - name: Cache cargo registry & index
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-          key: cargo-registry-${{ runner.os }}-${{ hashFiles('**/Cargo.lock', '**/Cargo.toml') }}
-
       - name: Set up Rust
         uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
 
       - name: Build (release)
         run: cargo build --release

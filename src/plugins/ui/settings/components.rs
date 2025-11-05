@@ -9,3 +9,6 @@ pub enum SettingsButtonAction {
     ToggleWindowMode,
     Back,
 }
+
+#[derive(Component)]
+pub struct WindowModeLabel;

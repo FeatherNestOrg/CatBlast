@@ -1,6 +1,8 @@
 use crate::plugins::core::messages::ApplyDisplaySettingsEvent;
 use crate::plugins::core::resources::{DisplaySettings, Resolution};
-use crate::plugins::ui::settings::components::{OnSettingsScreen, SettingsButtonAction};
+use crate::plugins::ui::settings::components::{
+    OnSettingsScreen, SettingsButtonAction, WindowModeLabel,
+};
 use crate::state::GameState;
 use bevy::prelude::*;
 use bevy::window::{MonitorSelection, WindowMode};
@@ -132,6 +134,7 @@ pub fn setup_settings_ui(
                 font.clone(),
                 TextColor(Color::WHITE),
                 TextLayout::new_with_justify(Justify::Center),
+                WindowModeLabel,
             ));
 
             parent
@@ -187,6 +190,23 @@ pub fn setup_settings_ui(
         });
 }
 
+pub fn update_window_mode_label_system(
+    display_settings: Res<DisplaySettings>,
+    mut query: Query<&mut Text, With<WindowModeLabel>>,
+) {
+    if !display_settings.is_changed() {
+        return;
+    }
+
+    let new_text = format!(
+        "窗口模式: {}",
+        window_mode_to_chinese(display_settings.window_mode)
+    );
+
+    for mut text in query.iter_mut() {
+        *text = Text::new(new_text.clone());
+    }
+}
 pub fn settings_button_interaction_system(
     mut q_interaction: Query<
         (&Interaction, &mut BackgroundColor, &SettingsButtonAction),
