@@ -4,7 +4,7 @@ use bevy::window::WindowMode;
 
 /// Event triggered when user wants to apply new display settings
 #[derive(Message)]
-pub struct ApplyDisplaySettingsEvent {
+pub struct ApplyDisplaySettingsMessage {
     pub resolution: Resolution,
     pub window_mode: WindowMode,
 }

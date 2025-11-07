@@ -1,6 +1,6 @@
-use crate::plugins::core::messages::ApplyDisplaySettingsEvent;
+use crate::plugins::core::messages::ApplyDisplaySettingsMessage;
 use crate::plugins::core::resources::{DisplaySettings, Resolution};
-use crate::plugins::ui::settings::components::{
+use crate::plugins::ui::overlays::settings::components::{
     OnSettingsScreen, SettingsButtonAction, WindowModeLabel,
 };
 use crate::state::GameState;
@@ -39,7 +39,6 @@ pub fn setup_settings_ui(
     asset_server: Res<AssetServer>,
     display_settings: Res<DisplaySettings>,
 ) {
-    commands.spawn((Camera2d, OnSettingsScreen));
     let font = TextFont {
         font: asset_server.load("fonts/ZCOOLKuaiLe-Regular.ttf"),
         ..default()
@@ -214,7 +213,7 @@ pub fn settings_button_interaction_system(
         (Changed<Interaction>, With<Button>),
     >,
     mut next_state: ResMut<NextState<GameState>>,
-    mut apply_settings_writer: MessageWriter<ApplyDisplaySettingsEvent>,
+    mut apply_settings_writer: MessageWriter<ApplyDisplaySettingsMessage>,
     display_settings: Res<DisplaySettings>,
 ) {
     for (interaction, mut color, action) in &mut q_interaction {
@@ -227,7 +226,7 @@ pub fn settings_button_interaction_system(
                             get_resolution_by_flat_index(&display_settings, *index)
                         {
                             info!("Selected resolution: {}", resolution);
-                            apply_settings_writer.write(ApplyDisplaySettingsEvent {
+                            apply_settings_writer.write(ApplyDisplaySettingsMessage {
                                 resolution,
                                 window_mode: display_settings.window_mode,
                             });
@@ -242,7 +241,7 @@ pub fn settings_button_interaction_system(
                             WindowMode::Fullscreen(_, _) => WindowMode::Windowed,
                         };
                         info!("Toggling window mode to: {:?}", new_mode);
-                        apply_settings_writer.write(ApplyDisplaySettingsEvent {
+                        apply_settings_writer.write(ApplyDisplaySettingsMessage {
                             resolution: display_settings.current_resolution,
                             window_mode: new_mode,
                         });

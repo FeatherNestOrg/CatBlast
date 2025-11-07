@@ -22,7 +22,8 @@ default = []
 dev-fast-build = ["bevy/dynamic_linking"]
 
 [dependencies]
-bevy = { version = "0.17" }
+bevy = { version = "0" }
+leafwing-input-manager = "0"
 rand = "0"
 
 tracing = "0.1"

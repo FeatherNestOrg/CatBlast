@@ -1,4 +1,19 @@
-pub mod main_menu;
-pub mod settings;
+use crate::plugins::ui::overlays::OverlayPlugin;
+use crate::plugins::ui::systems::menu_stack_control_system;
+use crate::state::OverlayState;
+use bevy::prelude::*;
 
-//TODO: Stop use state to manage ui
+pub mod main_menu;
+pub mod overlays;
+mod resources;
+mod styles;
+pub mod systems;
+
+pub struct UiPlugin;
+impl Plugin for UiPlugin {
+    fn build(&self, app: &mut App) {
+        app.init_state::<OverlayState>()
+            .add_plugins(OverlayPlugin)
+            .add_systems(Update, menu_stack_control_system);
+    }
+}

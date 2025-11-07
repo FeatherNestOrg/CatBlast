@@ -1,12 +1,14 @@
 mod plugins;
 mod state;
 
+use crate::plugins::core::GlobalAction;
 use crate::state::GameState;
 use bevy::prelude::*;
+use leafwing_input_manager::plugin::InputManagerPlugin;
 use plugins::core::CorePlugin;
 use plugins::match3::Match3Plugin;
 use plugins::ui::main_menu::MainMenuPlugin;
-use plugins::ui::settings::SettingsPlugin;
+use plugins::ui::overlays::settings::SettingsPlugin;
 use tracing_subscriber::EnvFilter;
 
 fn main() {
@@ -31,6 +33,7 @@ fn main() {
     App::new()
         .add_plugins((
             DefaultPlugins,
+            InputManagerPlugin::<GlobalAction>::default(),
             CorePlugin,
             Match3Plugin,
             MainMenuPlugin,

@@ -1,7 +1,12 @@
-use crate::plugins::core::messages::ApplyDisplaySettingsEvent;
+use crate::plugins::core::components::GlobalInputController;
+use crate::plugins::core::messages::ApplyDisplaySettingsMessage;
 use crate::plugins::core::resources::{DisplaySettings, MonitorInfo, Resolution};
 use bevy::prelude::*;
 use bevy::window::{Monitor, PrimaryWindow};
+use leafwing_input_manager::plugin::InputManagerSystem;
+
+use crate::plugins::core::GlobalAction;
+use leafwing_input_manager::prelude::*;
 
 pub fn setup_display_settings(mut commands: Commands, monitors: Query<(Entity, &Monitor)>) {
     let mut settings = DisplaySettings::default();
@@ -39,7 +44,7 @@ pub fn setup_display_settings(mut commands: Commands, monitors: Query<(Entity, &
 pub fn apply_display_settings_system(
     mut display_settings: ResMut<DisplaySettings>,
     mut primary_window: Query<&mut Window, With<PrimaryWindow>>,
-    mut reader: MessageReader<ApplyDisplaySettingsEvent>,
+    mut reader: MessageReader<ApplyDisplaySettingsMessage>,
 ) {
     for event in reader.read() {
         info!(
@@ -67,4 +72,9 @@ pub fn apply_display_settings_system(
             warn!("Could not find primary window to apply display settings");
         }
     }
+}
+
+pub fn setup_global_input(mut commands: Commands) {
+    let input_map = InputMap::new([(GlobalAction::ToggleMenu, KeyCode::Escape)]);
+    commands.spawn(input_map).insert(GlobalInputController);
 }

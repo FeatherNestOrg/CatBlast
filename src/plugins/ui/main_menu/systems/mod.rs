@@ -85,7 +85,7 @@ pub fn button_interaction_system(
                     }
                     MainMenuButtonAction::Settings => {
                         info!("设置按钮被点击, 切换到设置界面");
-                        next_state.set(GameState::Settings);
+                        // TODO: 重构使用Overlay系统
                     }
                     MainMenuButtonAction::Quit => {
                         app_exit_mw.write(AppExit::Success);
