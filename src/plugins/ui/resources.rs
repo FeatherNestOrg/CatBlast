@@ -1,7 +1,7 @@
 use crate::state::OverlayState;
 use bevy::prelude::*;
 
-#[derive(Resource)]
+#[derive(Resource, Default)]
 pub struct MenuStack {
     stack: Vec<OverlayState>,
 }

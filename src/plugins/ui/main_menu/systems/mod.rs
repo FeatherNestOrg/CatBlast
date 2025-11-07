@@ -1,6 +1,7 @@
 use crate::plugins::ui::main_menu::components::{MainMenuButtonAction, OnMainMenuScreen};
-use crate::state::GameState;
+use crate::state::{GameState, OverlayState};
 use bevy::prelude::*;
+use crate::plugins::ui::overlays::OpenOverlay;
 
 const NORMAL_BUTTON: Color = Color::srgb(0.15, 0.15, 0.15);
 const HOVERED_BUTTON: Color = Color::srgb(0.25, 0.25, 0.25);
@@ -11,8 +12,6 @@ pub fn setup_main_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
         font: asset_server.load("fonts/ZCOOLKuaiLe-Regular.ttf"),
         ..default()
     };
-
-    // 创建一个根节点，它将填充整个屏幕并居中其内容
     commands
         .spawn((
             Node {
@@ -71,7 +70,8 @@ pub fn button_interaction_system(
         (&Interaction, &mut BackgroundColor, &MainMenuButtonAction),
         (Changed<Interaction>, With<Button>),
     >,
-    mut next_state: ResMut<NextState<GameState>>,
+    mut ns_game: ResMut<NextState<GameState>>,
+    mut mw_overlay: MessageWriter<OpenOverlay>,
     mut app_exit_mw: MessageWriter<AppExit>,
 ) {
     for (interaction, mut color, action) in &mut q_interaction {
@@ -81,11 +81,11 @@ pub fn button_interaction_system(
                 match action {
                     MainMenuButtonAction::Play => {
                         info!("开始游戏按钮被点击, 切换到 Match3 状态。");
-                        next_state.set(GameState::Match3);
+                        ns_game.set(GameState::Match3);
                     }
                     MainMenuButtonAction::Settings => {
                         info!("设置按钮被点击, 切换到设置界面");
-                        // TODO: 重构使用Overlay系统
+                        mw_overlay.write(OpenOverlay { overlay: OverlayState::Settings });
                     }
                     MainMenuButtonAction::Quit => {
                         app_exit_mw.write(AppExit::Success);

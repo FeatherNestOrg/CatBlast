@@ -1,17 +1,22 @@
-pub(crate) use crate::plugins::ui::overlays::components::OverlayBackgroundMarker;
 use crate::plugins::ui::overlays::settings::SettingsPlugin;
 use bevy::prelude::*;
 
-pub mod components;
+mod components;
+pub use components::OverlayBackgroundMarker;
 pub mod settings;
+mod messages;
+pub use messages::OpenOverlay;
+use crate::state::OverlayState;
 
 pub struct OverlayPlugin;
 impl Plugin for OverlayPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins(SettingsPlugin);
+        app
+            .add_message::<OpenOverlay>()
+            .add_plugins(SettingsPlugin);
     }
 }
-pub fn setup_overlay_background(mut commands: Commands) {
+pub fn setup_overlay_background(mut commands: &mut Commands) {
     commands.spawn((
         Node {
             width: percent(100.0),
@@ -25,7 +30,7 @@ pub fn setup_overlay_background(mut commands: Commands) {
 }
 
 pub fn cleanup_overlay_background(
-    mut commands: Commands,
+    mut commands: &mut Commands,
     query: Query<Entity, With<OverlayBackgroundMarker>>,
 ) {
     for entity in query.iter() {

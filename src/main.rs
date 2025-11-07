@@ -10,6 +10,7 @@ use plugins::match3::Match3Plugin;
 use plugins::ui::main_menu::MainMenuPlugin;
 use plugins::ui::overlays::settings::SettingsPlugin;
 use tracing_subscriber::EnvFilter;
+use crate::plugins::ui::UiPlugin;
 
 fn main() {
     #[cfg(debug_assertions)]
@@ -35,9 +36,8 @@ fn main() {
             DefaultPlugins,
             InputManagerPlugin::<GlobalAction>::default(),
             CorePlugin,
+            UiPlugin,
             Match3Plugin,
-            MainMenuPlugin,
-            SettingsPlugin,
         ))
         .init_state::<GameState>()
         .insert_state(GameState::MainMenu)

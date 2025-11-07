@@ -1,19 +1,18 @@
 use crate::plugins::core::{GlobalAction, GlobalInputController};
-use crate::plugins::ui::overlays::{
-    OverlayBackgroundMarker, cleanup_overlay_background, setup_overlay_background,
-};
+use crate::plugins::ui::overlays::{OverlayBackgroundMarker, cleanup_overlay_background, setup_overlay_background, OpenOverlay};
 use crate::plugins::ui::resources::MenuStack;
 use crate::state::{GameState, OverlayState};
 use bevy::prelude::*;
 use leafwing_input_manager::prelude::ActionState;
 
 pub fn menu_stack_control_system(
-    commands: Commands,
+    mut commands: Commands,
     game_state: Res<State<GameState>>,
     mut overlay_state: ResMut<NextState<OverlayState>>,
     mut menu_stack: ResMut<MenuStack>,
     q_overlay_bg: Query<Entity, With<OverlayBackgroundMarker>>,
     q_action: Query<&ActionState<GlobalAction>, With<GlobalInputController>>,
+    mut mr_overlay: MessageReader<OpenOverlay>,
 ) {
     let action_state = q_action.single();
     if let Ok(action_state) = action_state
@@ -28,7 +27,7 @@ pub fn menu_stack_control_system(
             menu_stack.push(new_state);
             overlay_state.set(new_state);
             info!("Opening menu: {:?}", new_state);
-            setup_overlay_background(commands);
+            setup_overlay_background(&mut commands);
         } else {
             // 有状态就弹出
             if menu_stack.pop().is_some() {
@@ -38,9 +37,14 @@ pub fn menu_stack_control_system(
                 } else {
                     overlay_state.set(OverlayState::None);
                     info!("Closing all menus");
-                    cleanup_overlay_background(commands, q_overlay_bg);
+                    cleanup_overlay_background(&mut commands, q_overlay_bg);
                 }
             }
         }
+    }
+    for message in mr_overlay.read() {
+        if (menu_stack.is_empty()) { setup_overlay_background(&mut commands) }
+        menu_stack.push(message.overlay);
+        overlay_state.set(message.overlay);
     }
 }
