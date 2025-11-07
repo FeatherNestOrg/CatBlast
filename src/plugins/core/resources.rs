@@ -1,6 +1,5 @@
 use bevy::prelude::*;
 use bevy::window::WindowMode;
-use std::collections::HashMap;
 
 /// Represents a display resolution
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]

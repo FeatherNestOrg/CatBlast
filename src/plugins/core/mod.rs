@@ -5,7 +5,6 @@ pub mod systems;
 use crate::plugins::core::messages::ApplyDisplaySettingsEvent;
 use crate::plugins::core::systems::{apply_display_settings_system, setup_display_settings};
 use bevy::prelude::*;
-use crate::plugins::core::resources::DisplaySettings;
 
 pub struct CorePlugin;
 

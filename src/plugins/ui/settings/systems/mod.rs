@@ -39,6 +39,7 @@ pub fn setup_settings_ui(
     asset_server: Res<AssetServer>,
     display_settings: Res<DisplaySettings>,
 ) {
+    commands.spawn((Camera2d, OnSettingsScreen));
     let font = TextFont {
         font: asset_server.load("fonts/ZCOOLKuaiLe-Regular.ttf"),
         ..default()

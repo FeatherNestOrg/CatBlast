@@ -1,16 +1,16 @@
-use crate::plugins::match3::components::animation::{spawn_blast_particles, BlastAnimating, BlastParticle, FallAnimating, SwapAnimating};
+use crate::plugins::match3::components::animation::{
+    BlastAnimating, BlastParticle, FallAnimating, SwapAnimating, spawn_blast_particles,
+};
+use crate::plugins::match3::resources::PendingSwap;
 use crate::plugins::match3::state::Match3State;
+use crate::plugins::match3::state::Match3State::ProcessingBoard;
 use bevy::prelude::*;
 use bevy::time::Time;
-use crate::plugins::match3::resources::PendingSwap;
-use crate::plugins::match3::state::Match3State::ProcessingBoard;
 
 pub fn swap_animation_system(
     time: Res<Time>,
     mut q_animation_gems: Query<(Entity, &mut Transform, &mut SwapAnimating)>,
     mut commands: Commands,
-    mut next_state: ResMut<NextState<Match3State>>,
-    pending_swap: Res<PendingSwap>,
 ) {
     for (entity, mut transform, mut animation) in q_animation_gems.iter_mut() {
         animation.timer.tick(time.delta());
@@ -71,8 +71,10 @@ pub fn falling_animation_system(
         let eased_progress = 1.0 - (1.0 - progress).powi(3);
 
         // 使用缓动进度计算当前位置
-        transform.translation.x = fall.start_pos.x + (fall.end_pos.x - fall.start_pos.x) * eased_progress;
-        transform.translation.y = fall.start_pos.y + (fall.end_pos.y - fall.start_pos.y) * eased_progress;
+        transform.translation.x =
+            fall.start_pos.x + (fall.end_pos.x - fall.start_pos.x) * eased_progress;
+        transform.translation.y =
+            fall.start_pos.y + (fall.end_pos.y - fall.start_pos.y) * eased_progress;
 
         if fall.timer.just_finished() {
             transform.translation.x = fall.end_pos.x;

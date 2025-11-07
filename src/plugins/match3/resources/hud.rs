@@ -18,12 +18,12 @@ pub struct HudLayout {
 
 impl HudLayout {
     /// 根据分辨率计算响应式布局
-    /// 比例：顶部 10%、左右各 15%、底部 12%、中间给棋盘
+    /// 比例：顶部 10%、左右各 25%、底部 15%、中间给棋盘
     pub fn from_resolution(width: f32, height: f32) -> Self {
         let top_panel_height = height * 0.10;
-        let left_panel_width = width * 0.20;
-        let right_panel_width = width * 0.20;
-        let bottom_panel_height = height * 0.12;
+        let left_panel_width = width * 0.25;
+        let right_panel_width = width * 0.25;
+        let bottom_panel_height = height * 0.15;
 
         let board_available_width = width - left_panel_width - right_panel_width;
         let board_available_height = height - top_panel_height - bottom_panel_height;
@@ -62,4 +62,3 @@ impl Default for HudLayout {
         Self::from_resolution(1280.0, 720.0)
     }
 }
-
