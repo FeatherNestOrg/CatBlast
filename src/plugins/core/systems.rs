@@ -1,4 +1,4 @@
-use crate::plugins::core::components::GlobalInputController;
+use crate::plugins::core::components::{GlobalInputController, MenuNavigationInputController};
 use crate::plugins::core::messages::ApplyDisplaySettingsMessage;
 use crate::plugins::core::resources::{DisplaySettings, MonitorInfo, Resolution};
 use bevy::prelude::*;
@@ -6,6 +6,7 @@ use bevy::window::{Monitor, PrimaryWindow};
 use leafwing_input_manager::plugin::InputManagerSystem;
 
 use crate::plugins::core::GlobalAction;
+use crate::plugins::core::actions::MenuNavigationAction;
 use leafwing_input_manager::prelude::*;
 
 pub fn setup_display_settings(mut commands: Commands, monitors: Query<(Entity, &Monitor)>) {
@@ -77,4 +78,17 @@ pub fn apply_display_settings_system(
 pub fn setup_global_input(mut commands: Commands) {
     let input_map = InputMap::new([(GlobalAction::ToggleMenu, KeyCode::Escape)]);
     commands.spawn(input_map).insert(GlobalInputController);
+}
+
+pub fn setup_menu_navigation_input(mut commands: Commands) {
+    let input_map = InputMap::new([
+        (MenuNavigationAction::Up, KeyCode::ArrowUp),
+        (MenuNavigationAction::Down, KeyCode::ArrowDown),
+        (MenuNavigationAction::Left, KeyCode::ArrowLeft),
+        (MenuNavigationAction::Right, KeyCode::ArrowRight),
+        (MenuNavigationAction::Select, KeyCode::Enter),
+    ]);
+    commands
+        .spawn(input_map)
+        .insert(MenuNavigationInputController);
 }

@@ -63,7 +63,7 @@ pub fn menu_stack_control_system(
 }
 
 fn try_pop_menu(
-    mut commands: &mut Commands,
+    commands: &mut Commands,
     overlay_state: &mut ResMut<NextState<OverlayState>>,
     menu_stack: &mut ResMut<MenuStack>,
     q_overlay_bg: Query<Entity, With<OverlayBackgroundMarker>>,
@@ -75,7 +75,7 @@ fn try_pop_menu(
         } else {
             overlay_state.set(OverlayState::None);
             info!("Closing all menus");
-            cleanup_overlay_background(&mut commands, q_overlay_bg);
+            cleanup_overlay_background(commands, q_overlay_bg);
         }
     }
 }
