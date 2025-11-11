@@ -3,16 +3,15 @@ use bevy::prelude::*;
 
 mod components;
 pub use components::OverlayBackgroundMarker;
-pub mod settings;
 mod messages;
-pub use messages::OpenOverlay;
+pub mod settings;
 use crate::state::OverlayState;
+pub use messages::{OverlayAction, OverlayMessage};
 
 pub struct OverlayPlugin;
 impl Plugin for OverlayPlugin {
     fn build(&self, app: &mut App) {
-        app
-            .add_message::<OpenOverlay>()
+        app.add_message::<OverlayMessage>()
             .add_plugins(SettingsPlugin);
     }
 }

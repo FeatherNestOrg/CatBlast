@@ -1,7 +1,7 @@
 use crate::plugins::ui::main_menu::components::{MainMenuButtonAction, OnMainMenuScreen};
+use crate::plugins::ui::overlays::{OverlayAction, OverlayMessage};
 use crate::state::{GameState, OverlayState};
 use bevy::prelude::*;
-use crate::plugins::ui::overlays::OpenOverlay;
 
 const NORMAL_BUTTON: Color = Color::srgb(0.15, 0.15, 0.15);
 const HOVERED_BUTTON: Color = Color::srgb(0.25, 0.25, 0.25);
@@ -71,7 +71,7 @@ pub fn button_interaction_system(
         (Changed<Interaction>, With<Button>),
     >,
     mut ns_game: ResMut<NextState<GameState>>,
-    mut mw_overlay: MessageWriter<OpenOverlay>,
+    mut mw_overlay: MessageWriter<OverlayMessage>,
     mut app_exit_mw: MessageWriter<AppExit>,
 ) {
     for (interaction, mut color, action) in &mut q_interaction {
@@ -85,7 +85,10 @@ pub fn button_interaction_system(
                     }
                     MainMenuButtonAction::Settings => {
                         info!("设置按钮被点击, 切换到设置界面");
-                        mw_overlay.write(OpenOverlay { overlay: OverlayState::Settings });
+                        mw_overlay.write(OverlayMessage {
+                            action: OverlayAction::Push,
+                            overlay: OverlayState::Settings,
+                        });
                     }
                     MainMenuButtonAction::Quit => {
                         app_exit_mw.write(AppExit::Success);

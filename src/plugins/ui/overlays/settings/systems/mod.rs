@@ -3,7 +3,8 @@ use crate::plugins::core::resources::{DisplaySettings, Resolution};
 use crate::plugins::ui::overlays::settings::components::{
     OnSettingsScreen, SettingsButtonAction, WindowModeLabel,
 };
-use crate::state::GameState;
+use crate::plugins::ui::overlays::{OverlayAction, OverlayMessage};
+use crate::state::{GameState, OverlayState};
 use bevy::prelude::*;
 use bevy::window::{MonitorSelection, WindowMode};
 
@@ -212,7 +213,7 @@ pub fn settings_button_interaction_system(
         (&Interaction, &mut BackgroundColor, &SettingsButtonAction),
         (Changed<Interaction>, With<Button>),
     >,
-    mut next_state: ResMut<NextState<GameState>>,
+    mut mw_overlay: MessageWriter<OverlayMessage>,
     mut apply_settings_writer: MessageWriter<ApplyDisplaySettingsMessage>,
     display_settings: Res<DisplaySettings>,
 ) {
@@ -248,7 +249,10 @@ pub fn settings_button_interaction_system(
                     }
                     SettingsButtonAction::Back => {
                         info!("Back button clicked, returning to main menu");
-                        next_state.set(GameState::MainMenu);
+                        mw_overlay.write(OverlayMessage {
+                            action: OverlayAction::Pop,
+                            overlay: OverlayState::Settings,
+                        });
                     }
                 }
             }
