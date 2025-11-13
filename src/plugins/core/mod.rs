@@ -1,7 +1,9 @@
 mod actions;
 pub use actions::GlobalAction;
+pub use actions::MenuNavigationAction;
 mod components;
 pub use components::GlobalInputController;
+pub use components::MenuNavigationInputController;
 pub mod messages;
 pub mod resources;
 pub mod systems;

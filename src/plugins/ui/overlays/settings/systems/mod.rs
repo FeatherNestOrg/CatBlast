@@ -4,7 +4,7 @@ use crate::plugins::ui::overlays::settings::components::{
     OnSettingsScreen, SettingsButtonAction, WindowModeLabel,
 };
 use crate::plugins::ui::overlays::{OverlayAction, OverlayMessage};
-use crate::state::{GameState, OverlayState};
+use crate::state::OverlayState;
 use bevy::prelude::*;
 use bevy::window::{MonitorSelection, WindowMode};
 

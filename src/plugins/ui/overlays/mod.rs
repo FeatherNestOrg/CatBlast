@@ -15,7 +15,7 @@ impl Plugin for OverlayPlugin {
             .add_plugins(SettingsPlugin);
     }
 }
-pub fn setup_overlay_background(mut commands: &mut Commands) {
+pub fn setup_overlay_background(commands: &mut Commands) {
     commands.spawn((
         Node {
             width: percent(100.0),
@@ -29,7 +29,7 @@ pub fn setup_overlay_background(mut commands: &mut Commands) {
 }
 
 pub fn cleanup_overlay_background(
-    mut commands: &mut Commands,
+    commands: &mut Commands,
     query: Query<Entity, With<OverlayBackgroundMarker>>,
 ) {
     for entity in query.iter() {

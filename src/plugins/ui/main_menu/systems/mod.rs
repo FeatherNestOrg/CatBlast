@@ -1,7 +1,13 @@
+use crate::plugins::core::{
+    GlobalAction, GlobalInputController, MenuNavigationAction, MenuNavigationInputController,
+};
 use crate::plugins::ui::main_menu::components::{MainMenuButtonAction, OnMainMenuScreen};
 use crate::plugins::ui::overlays::{OverlayAction, OverlayMessage};
 use crate::state::{GameState, OverlayState};
+use bevy::input_focus::directional_navigation::DirectionalNavigation;
+use bevy::math::CompassOctant;
 use bevy::prelude::*;
+use leafwing_input_manager::action_state::ActionState;
 
 const NORMAL_BUTTON: Color = Color::srgb(0.15, 0.15, 0.15);
 const HOVERED_BUTTON: Color = Color::srgb(0.25, 0.25, 0.25);
@@ -47,7 +53,7 @@ pub fn setup_main_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
                             ..default()
                         },
                         BackgroundColor(NORMAL_BUTTON),
-                        action, // 添加我们的标记组件！
+                        action,
                     ))
                     .with_children(|parent| {
                         parent.spawn((
@@ -102,6 +108,32 @@ pub fn button_interaction_system(
                 *color = NORMAL_BUTTON.into();
             }
         }
+    }
+}
+
+pub fn handle_direction_input(
+    q_action: Query<&ActionState<MenuNavigationAction>, With<MenuNavigationInputController>>,
+    mut nav: DirectionalNavigation,
+) {
+    let action_state = q_action.single();
+    let mut dir = None;
+    if let Ok(action_state) = action_state {
+        dir = if action_state.just_pressed(&MenuNavigationAction::Up) {
+            Some(CompassOctant::North)
+        } else if action_state.just_pressed(&MenuNavigationAction::Down) {
+            Some(CompassOctant::South)
+        } else if action_state.just_pressed(&MenuNavigationAction::Left) {
+            Some(CompassOctant::West)
+        } else if action_state.just_pressed(&MenuNavigationAction::Right) {
+            Some(CompassOctant::East)
+        } else {
+            None
+        }
+    }
+    if let Some(o) = dir
+        && let Err(e) = nav.navigate(o)
+    {
+        error!("Menu nav err: {:?}", e);
     }
 }
 
