@@ -1,3 +1,5 @@
+pub mod navigation;
+
 use crate::plugins::core::{GlobalAction, GlobalInputController};
 use crate::plugins::ui::overlays::{
     OverlayAction, OverlayBackgroundMarker, OverlayMessage, cleanup_overlay_background,

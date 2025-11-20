@@ -14,6 +14,7 @@ use crate::plugins::core::systems::{
     setup_menu_navigation_input,
 };
 use bevy::prelude::*;
+use leafwing_input_manager::plugin::InputManagerPlugin;
 
 pub struct CorePlugin;
 
@@ -21,6 +22,10 @@ impl Plugin for CorePlugin {
     fn build(&self, app: &mut App) {
         app
             // .init_resource::<DisplaySettings>()
+            .add_plugins((
+                InputManagerPlugin::<GlobalAction>::default(),
+                InputManagerPlugin::<MenuNavigationAction>::default(),
+            ))
             .add_message::<ApplyDisplaySettingsMessage>()
             .add_systems(
                 Startup,

@@ -1,5 +1,10 @@
 use crate::plugins::core::messages::ApplyDisplaySettingsMessage;
 use crate::plugins::core::resources::{DisplaySettings, Resolution};
+use crate::plugins::ui::button_builder::{
+    ButtonNavigationBuilder, NavigationLayout, create_button_node, spawn_button,
+};
+use crate::plugins::ui::components::Selected;
+use crate::plugins::ui::navigation::NavigationGraph;
 use crate::plugins::ui::overlays::settings::components::{
     OnSettingsScreen, SettingsButtonAction, WindowModeLabel,
 };
@@ -7,11 +12,6 @@ use crate::plugins::ui::overlays::{OverlayAction, OverlayMessage};
 use crate::state::OverlayState;
 use bevy::prelude::*;
 use bevy::window::{MonitorSelection, WindowMode};
-
-const NORMAL_BUTTON: Color = Color::srgb(0.15, 0.15, 0.15);
-const HOVERED_BUTTON: Color = Color::srgb(0.25, 0.25, 0.25);
-const PRESSED_BUTTON: Color = Color::srgb(0.35, 0.75, 0.35);
-const SELECTED_BUTTON: Color = Color::srgb(0.2, 0.5, 0.2);
 
 fn window_mode_to_chinese(mode: WindowMode) -> &'static str {
     match mode {
@@ -39,6 +39,7 @@ pub fn setup_settings_ui(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     display_settings: Res<DisplaySettings>,
+    mut nav_graph: ResMut<NavigationGraph>,
 ) {
     let font = TextFont {
         font: asset_server.load("fonts/ZCOOLKuaiLe-Regular.ttf"),
@@ -51,6 +52,15 @@ pub fn setup_settings_ui(
             flat_resolutions.push(res);
         }
     }
+
+    // Clear previous navigation graph
+    nav_graph.clear();
+
+    // Create button builder
+    let mut button_builder = ButtonNavigationBuilder::new(NavigationLayout::Vertical);
+
+    // Track which resolution buttons should be marked as selected
+    let mut selected_buttons = Vec::new();
 
     // Root node
     commands
@@ -91,24 +101,12 @@ pub fn setup_settings_ui(
             // Resolution buttons
             for (index, resolution) in flat_resolutions.iter().enumerate() {
                 let is_selected = *resolution == display_settings.current_resolution;
-                let button_color = if is_selected {
-                    SELECTED_BUTTON
-                } else {
-                    NORMAL_BUTTON
-                };
 
-                parent
+                let button_entity = parent
                     .spawn((
                         Button,
-                        Node {
-                            width: px(250.0),
-                            height: px(50.0),
-                            margin: UiRect::all(px(5.0)),
-                            justify_content: JustifyContent::Center,
-                            align_items: AlignItems::Center,
-                            ..default()
-                        },
-                        BackgroundColor(button_color),
+                        create_button_node(250.0, 50.0, 5.0),
+                        BackgroundColor(Color::BLACK), // Will be managed by universal_button_style_system
                         SettingsButtonAction::SelectResolution(index),
                     ))
                     .with_children(|button| {
@@ -117,7 +115,15 @@ pub fn setup_settings_ui(
                             font.clone(),
                             TextLayout::new_with_justify(Justify::Center),
                         ));
-                    });
+                    })
+                    .id();
+
+                // Track if this button should be marked as selected
+                if is_selected {
+                    selected_buttons.push(button_entity);
+                }
+
+                button_builder.add_button(button_entity);
             }
 
             // Spacing
@@ -138,27 +144,14 @@ pub fn setup_settings_ui(
                 WindowModeLabel,
             ));
 
-            parent
-                .spawn((
-                    Button,
-                    Node {
-                        width: px(250.0),
-                        height: px(50.0),
-                        margin: UiRect::all(px(10.0)),
-                        justify_content: JustifyContent::Center,
-                        align_items: AlignItems::Center,
-                        ..default()
-                    },
-                    BackgroundColor(NORMAL_BUTTON),
-                    SettingsButtonAction::ToggleWindowMode,
-                ))
-                .with_children(|button| {
-                    button.spawn((
-                        Text::new("切换窗口模式"),
-                        font.clone(),
-                        TextLayout::new_with_justify(Justify::Center),
-                    ));
-                });
+            let toggle_button = spawn_button(
+                parent,
+                "切换窗口模式",
+                SettingsButtonAction::ToggleWindowMode,
+                &font,
+                create_button_node(250.0, 50.0, 10.0),
+            );
+            button_builder.add_button(toggle_button);
 
             // Spacing
             parent.spawn(Node {
@@ -167,28 +160,23 @@ pub fn setup_settings_ui(
             });
 
             // Back button
-            parent
-                .spawn((
-                    Button,
-                    Node {
-                        width: px(250.0),
-                        height: px(50.0),
-                        margin: UiRect::all(px(10.0)),
-                        justify_content: JustifyContent::Center,
-                        align_items: AlignItems::Center,
-                        ..default()
-                    },
-                    BackgroundColor(NORMAL_BUTTON),
-                    SettingsButtonAction::Back,
-                ))
-                .with_children(|button| {
-                    button.spawn((
-                        Text::new("返回"),
-                        font.clone(),
-                        TextLayout::new_with_justify(Justify::Center),
-                    ));
-                });
+            let back_button = spawn_button(
+                parent,
+                "返回",
+                SettingsButtonAction::Back,
+                &font,
+                create_button_node(250.0, 50.0, 10.0),
+            );
+            button_builder.add_button(back_button);
         });
+
+    // Mark selected buttons (outside the closure)
+    for entity in selected_buttons {
+        commands.entity(entity).insert(Selected);
+    }
+
+    // Build navigation graph and set initial focus
+    button_builder.build(&mut commands, &mut nav_graph, true);
 }
 
 pub fn update_window_mode_label_system(
@@ -209,69 +197,62 @@ pub fn update_window_mode_label_system(
     }
 }
 pub fn settings_button_interaction_system(
-    mut q_interaction: Query<
-        (&Interaction, &mut BackgroundColor, &SettingsButtonAction),
+    mut commands: Commands,
+    q_interaction: Query<
+        (Entity, &Interaction, &SettingsButtonAction),
         (Changed<Interaction>, With<Button>),
     >,
+    q_all_res_buttons: Query<(Entity, &SettingsButtonAction), With<Button>>,
     mut mw_overlay: MessageWriter<OverlayMessage>,
     mut apply_settings_writer: MessageWriter<ApplyDisplaySettingsMessage>,
     display_settings: Res<DisplaySettings>,
 ) {
-    for (interaction, mut color, action) in &mut q_interaction {
-        match *interaction {
-            Interaction::Pressed => {
-                *color = PRESSED_BUTTON.into();
-                match action {
-                    SettingsButtonAction::SelectResolution(index) => {
-                        if let Some(resolution) =
-                            get_resolution_by_flat_index(&display_settings, *index)
-                        {
-                            info!("Selected resolution: {}", resolution);
-                            apply_settings_writer.write(ApplyDisplaySettingsMessage {
-                                resolution,
-                                window_mode: display_settings.window_mode,
-                            });
-                        }
-                    }
-                    SettingsButtonAction::ToggleWindowMode => {
-                        let new_mode = match display_settings.window_mode {
-                            WindowMode::Windowed => {
-                                WindowMode::BorderlessFullscreen(MonitorSelection::Current)
-                            }
-                            WindowMode::BorderlessFullscreen(_) => WindowMode::Windowed,
-                            WindowMode::Fullscreen(_, _) => WindowMode::Windowed,
-                        };
-                        info!("Toggling window mode to: {:?}", new_mode);
-                        apply_settings_writer.write(ApplyDisplaySettingsMessage {
-                            resolution: display_settings.current_resolution,
-                            window_mode: new_mode,
-                        });
-                    }
-                    SettingsButtonAction::Back => {
-                        info!("Back button clicked, returning to main menu");
-                        mw_overlay.write(OverlayMessage {
-                            action: OverlayAction::Pop,
-                            overlay: OverlayState::Settings,
-                        });
-                    }
-                }
-            }
-            Interaction::Hovered => {
-                *color = HOVERED_BUTTON.into();
-            }
-            Interaction::None => {
-                // Check if this resolution button should be highlighted as selected
-                if let SettingsButtonAction::SelectResolution(index) = action {
+    for (entity, interaction, action) in &q_interaction {
+        if *interaction == Interaction::Pressed {
+            match action {
+                SettingsButtonAction::SelectResolution(index) => {
                     if let Some(resolution) =
                         get_resolution_by_flat_index(&display_settings, *index)
                     {
-                        if resolution == display_settings.current_resolution {
-                            *color = SELECTED_BUTTON.into();
-                            continue;
+                        info!("Selected resolution: {}", resolution);
+
+                        // Remove Selected from all resolution buttons
+                        for (btn_entity, btn_action) in q_all_res_buttons.iter() {
+                            if matches!(btn_action, SettingsButtonAction::SelectResolution(_)) {
+                                commands.entity(btn_entity).remove::<Selected>();
+                            }
                         }
+
+                        // Add Selected to the pressed button
+                        commands.entity(entity).insert(Selected);
+
+                        apply_settings_writer.write(ApplyDisplaySettingsMessage {
+                            resolution,
+                            window_mode: display_settings.window_mode,
+                        });
                     }
                 }
-                *color = NORMAL_BUTTON.into();
+                SettingsButtonAction::ToggleWindowMode => {
+                    let new_mode = match display_settings.window_mode {
+                        WindowMode::Windowed => {
+                            WindowMode::BorderlessFullscreen(MonitorSelection::Current)
+                        }
+                        WindowMode::BorderlessFullscreen(_) => WindowMode::Windowed,
+                        WindowMode::Fullscreen(_, _) => WindowMode::Windowed,
+                    };
+                    info!("Toggling window mode to: {:?}", new_mode);
+                    apply_settings_writer.write(ApplyDisplaySettingsMessage {
+                        resolution: display_settings.current_resolution,
+                        window_mode: new_mode,
+                    });
+                }
+                SettingsButtonAction::Back => {
+                    info!("Back button clicked, returning to main menu");
+                    mw_overlay.write(OverlayMessage {
+                        action: OverlayAction::Pop,
+                        overlay: OverlayState::Settings,
+                    });
+                }
             }
         }
     }

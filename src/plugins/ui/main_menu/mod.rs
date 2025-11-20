@@ -2,7 +2,7 @@ mod components;
 mod systems;
 
 use crate::plugins::ui::main_menu::systems::{
-    button_interaction_system, cleanup_main_menu, handle_direction_input, setup_main_menu,
+    button_interaction_system, cleanup_main_menu, setup_main_menu,
 };
 use crate::plugins::ui::overlays::OverlayMessage;
 use crate::state::GameState;
@@ -15,8 +15,7 @@ impl Plugin for MainMenuPlugin {
         app.add_systems(OnEnter(GameState::MainMenu), setup_main_menu)
             .add_systems(
                 Update,
-                (button_interaction_system, handle_direction_input)
-                    .run_if(in_state(GameState::MainMenu)),
+                button_interaction_system.run_if(in_state(GameState::MainMenu)),
             )
             .add_systems(OnExit(GameState::MainMenu), cleanup_main_menu);
     }
